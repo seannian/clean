@@ -8,11 +8,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.compose.ui.tooling.preview.Preview // Add this import
-import com.example.myapplication.ui.theme.MyApplicationTheme // Add this import
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.myapplication.ui.theme.MyApplicationTheme
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun Greeting(name: String, modifier: Modifier = Modifier, onSignOut: () -> Unit) {
     // State variables
     var inputText by remember { mutableStateOf("") }
     var displayText by remember { mutableStateOf("Hello $name!") }
@@ -98,6 +98,17 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                 color = if (feedbackMessage.startsWith("Error")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Sign Out Button
+        Button(
+            onClick = onSignOut,
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Sign Out")
+        }
     }
 }
 
@@ -105,6 +116,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     MyApplicationTheme {
-        Greeting("Android")
+        Greeting("Android", onSignOut = {})
     }
 }
