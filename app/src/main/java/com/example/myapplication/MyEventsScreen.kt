@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MyEventsScreen() { // doubles as Past Events screen
+fun MyEventsScreen(myEvents: Boolean) { // doubles as Past Events screen
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("This is the My Events & Past Events Page")
+        TitleText(if (myEvents) "My Events" else "Past Events")
     }
 }

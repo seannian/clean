@@ -11,6 +11,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FriendsScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("This is the Friends Page")
+        TitleText("Friends")
     }
 }

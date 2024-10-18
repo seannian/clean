@@ -11,6 +11,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LeaderboardScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("This is the Leaderboard Page")
+        TitleText("Leaderboard")
     }
 }

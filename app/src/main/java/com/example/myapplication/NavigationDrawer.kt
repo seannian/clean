@@ -112,7 +112,7 @@ fun NavigationDrawer() {
                             drawerState.close()
                         }
                         currentPage = Page.Past_Events
-                        navController.navigate("my_events")
+                        navController.navigate("past_events")
                     },
                     colors = NavigationDrawerItemDefaults.colors(
                         selectedContainerColor = Color.Transparent
@@ -145,7 +145,8 @@ fun NavigationDrawer() {
                     )
                 )
             }
-        }
+        },
+        gesturesEnabled = false
     ) {
         Scaffold(
             topBar = {
@@ -174,8 +175,8 @@ fun NavigationDrawer() {
                 ) {
                     composable("leaderboard") { LeaderboardScreen() }
                     composable("events") { EventsScreen() }
-                    composable("my_events") { MyEventsScreen() }
-                    composable("past_events") { MyEventsScreen() }
+                    composable("my_events") { MyEventsScreen(true) }
+                    composable("past_events") { MyEventsScreen(false) }
                     composable("friends") { FriendsScreen() }
                 }
             }
