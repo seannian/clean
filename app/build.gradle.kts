@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    kotlin("kapt")
 }
 
 android {
@@ -58,6 +59,9 @@ dependencies {
     // Navigation Compose (only once)
     implementation("androidx.navigation:navigation-compose:2.6.0")
 
+    implementation("com.github.bumptech.glide:glide:4.14.2")
+    kapt("com.github.bumptech.glide:compiler:4.14.2")
+
     // Jetpack Compose and other AndroidX dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -68,6 +72,12 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.drawerlayout)
+    implementation(libs.material)
+    implementation("androidx.compose.ui:ui:1.5.1")
+    implementation("androidx.compose.material:material:1.5.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.5.1")
+    implementation("androidx.activity:activity-compose:1.7.2")
 
     // Testing dependencies
     testImplementation(libs.junit)
