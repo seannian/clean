@@ -30,3 +30,22 @@ fun TitleText(content: String) {
         color = Color.Black
     )
 }
+
+@Composable
+fun EventTitleText(content: String) {
+    Text(
+        text = content,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.Black
+    )
+}
+
+@Composable
+fun SubText(content: String, color: Color) {
+    Text(
+        text = content,
+        fontSize = 20.sp,
+        color = color
+    )
+}
