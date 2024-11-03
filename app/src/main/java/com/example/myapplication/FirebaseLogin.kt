@@ -17,6 +17,7 @@ import androidx.navigation.compose.*
 import com.google.android.gms.auth.api.signin.*
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.*
+import com.example.myapplication.ui.theme.MyApplicationTheme
 
 @Composable
 fun FirebaseLogin() {
@@ -90,8 +91,13 @@ fun FirebaseLogin() {
                 name = currentUser?.displayName ?: "User",
                 onSignOut = {
                     signOut(auth, googleSignInClient, activity)
-                }
+                },
+                navController = navController // Pass navController here
             )
+        }
+        // Add the new route for TestCreateUser
+        composable("testCreateUser") {
+            TestCreateUser(navController = navController)
         }
     }
 }
