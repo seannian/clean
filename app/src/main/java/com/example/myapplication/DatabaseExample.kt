@@ -280,24 +280,26 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
                 isAddingEvents = true
                 val eventsCollection = db.collection("Events")
                 val batch = db.batch()
-                for (i in 1..10) {
-                    val title = "Event Title $i"
-                    val location = "Location $i"
-                    val date = "2023-10-${(10 + i).toString().padStart(2, '0')}" // YYYY-MM-DD
-                    val startTime = "${9 + i % 12}:00 AM"
-                    val finishTime = "${12 + i % 12}:00 PM"
-                    val thumbnail = "https://example.com/thumbnail$i.png"
-                    val description = "Description for event $i"
-                    val points = (10..100).random()
+                for (i in 1..9) {
+                    val title = "$i"
+                    val author = "$i"
+                    val eventPicUri = "$i";
+                    val date = "$i"
+                    val time = "$i"
+                    val location = "$i"
+                    val description = "$i"
+                    val maxAttendees = "$i"
+                    val points = "$i"
 
                     val eventData = hashMapOf(
                         "Title" to title,
-                        "Location" to location,
+                        "Author" to author,
+                        "EventPicUri" to eventPicUri,
                         "Date" to date,
-                        "StartTime" to startTime,
-                        "FinishTime" to finishTime,
-                        "Thumbnail" to thumbnail,
+                        "Time" to time,
+                        "Location" to location,
                         "Description" to description,
+                        "MaxAttendees" to maxAttendees,
                         "Points" to points
                     )
 
