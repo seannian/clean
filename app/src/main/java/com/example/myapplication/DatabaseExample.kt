@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp // Import Firebase Timestamp
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.google.firebase.firestore.Query
@@ -24,6 +25,7 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
     var isAddingUsers by remember { mutableStateOf(false) }
     var isQueryingUsers by remember { mutableStateOf(false) }
     var topUsers by remember { mutableStateOf<List<Map<String, Any>>?>(null) }
+    var isAddingEvents by remember { mutableStateOf(false) }
 
     // Firestore instance
     val db = FirebaseFirestore.getInstance()
@@ -140,7 +142,7 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
                             feedbackMessage = "Deleting all data..."
 
                             // Define all collections to delete
-                            val collectionsToDelete = listOf("userInputs", "Users")
+                            val collectionsToDelete = listOf("userInputs", "Users", "Events")
 
                             // Function to delete all documents in a collection
                             fun deleteCollection(collectionName: String, onComplete: (Boolean, String) -> Unit) {
@@ -222,14 +224,25 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
                 isAddingUsers = true
                 val usersCollection = db.collection("Users")
                 val batch = db.batch()
+
                 for (i in 1..10) {
                     val username = "User$i"
                     val email = "user$i@example.com"
                     val score = (0..100).random()
+                    // Use Firebase Timestamp for JoinDate
+                    val joinDate = Timestamp.now() // Current timestamp
+                    val totalCleanups = (0..50).random()
+                    val profilePicture = "https://example.com/profile$i.png"
+                    val description = "Description for user $i"
+
                     val userData = hashMapOf(
                         "username" to username,
                         "email" to email,
-                        "score" to score
+                        "score" to score,
+                        "JoinDate" to joinDate, // Firebase Timestamp
+                        "TotalNumberOfCleanups" to totalCleanups,
+                        "ProfilePicture" to profilePicture,
+                        "Description" to description
                     )
                     val newUserRef = usersCollection.document()
                     batch.set(newUserRef, userData)
@@ -256,6 +269,63 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
                 Text("Adding Users...")
             } else {
                 Text("Add Sample Users")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Add Dummy Events Button
+        Button(
+            onClick = {
+                isAddingEvents = true
+                val eventsCollection = db.collection("Events")
+                val batch = db.batch()
+                for (i in 1..10) {
+                    val title = "Event Title $i"
+                    val location = "Location $i"
+                    val date = "2023-10-${(10 + i).toString().padStart(2, '0')}" // YYYY-MM-DD
+                    val startTime = "${9 + i % 12}:00 AM"
+                    val finishTime = "${12 + i % 12}:00 PM"
+                    val thumbnail = "https://example.com/thumbnail$i.png"
+                    val description = "Description for event $i"
+                    val points = (10..100).random()
+
+                    val eventData = hashMapOf(
+                        "Title" to title,
+                        "Location" to location,
+                        "Date" to date,
+                        "StartTime" to startTime,
+                        "FinishTime" to finishTime,
+                        "Thumbnail" to thumbnail,
+                        "Description" to description,
+                        "Points" to points
+                    )
+
+                    val newEventRef = eventsCollection.document()
+                    batch.set(newEventRef, eventData)
+                }
+                batch.commit()
+                    .addOnSuccessListener {
+                        isAddingEvents = false
+                        feedbackMessage = "10 dummy events added successfully."
+                    }
+                    .addOnFailureListener { e ->
+                        isAddingEvents = false
+                        feedbackMessage = "Error adding dummy events: ${e.message}"
+                    }
+            },
+            enabled = !isAddingEvents,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (isAddingEvents) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Adding Events...")
+            } else {
+                Text("Add Dummy Events")
             }
         }
 
@@ -306,8 +376,9 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
                     is Int -> scoreValue.toLong()
                     else -> 0L
                 }
+                val totalCleanups = user["TotalNumberOfCleanups"] ?: "N/A"
                 Text(
-                    text = "Username: $username, Score: $score",
+                    text = "Username: $username, Score: $score, Cleanups: $totalCleanups",
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
