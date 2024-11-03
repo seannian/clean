@@ -7,6 +7,7 @@ data class Event(
     var date: String = "",
     var time: String = "",
     var location: String = "",
+    var description: String = "",
     var maxAttendees: Int = 0,
     var points: Int = 3
 )
