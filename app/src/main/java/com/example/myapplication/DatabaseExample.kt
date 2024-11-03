@@ -8,13 +8,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.Timestamp // Import Firebase Timestamp
+import com.google.firebase.Timestamp
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.google.firebase.firestore.Query
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun DatabaseExample(name: String, onSignOut: () -> Unit) {
+fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavController) {
     // State variables
     var inputText by remember { mutableStateOf("") }
     var displayText by remember { mutableStateOf("Hello $name!") }
@@ -34,9 +36,11 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top, // Changed to Top to accommodate scrolling
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
         // Greeting Text
         Text(
             text = displayText,
@@ -386,6 +390,18 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
             }
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // New Button to Navigate to TestCreateUser
+        Button(
+            onClick = {
+                navController.navigate("testCreateUser")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Go to TestCreateUser")
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         // Sign Out Button
@@ -403,6 +419,7 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit) {
 @Composable
 fun DatabaseExamplePreview() {
     MyApplicationTheme {
-        DatabaseExample(name = "John Doe", onSignOut = {})
+        val navController = rememberNavController()
+        DatabaseExample(name = "John Doe", onSignOut = {}, navController)
     }
 }
