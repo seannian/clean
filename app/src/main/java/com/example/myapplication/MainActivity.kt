@@ -41,6 +41,14 @@ fun MainScreen(navController: NavHostController) {
         composable("navigationDrawer") {
             NavigationDrawer()
         }
+        // New Composable Route for FunctionTest
+        composable("functionTest") {
+            FunctionTest(navController = navController)
+        }
+        // New Composable Route for CreateEvent
+        composable("createEvent") {
+            CreateEvent()
+        }
     }
 }
 
@@ -59,6 +67,9 @@ fun HomeScreen(navController: NavHostController) {
             }
             Button(onClick = { navController.navigate("navigationDrawer") }) {
                 Text(text = "Go to Navigation Drawer")
+            }
+            Button(onClick = { navController.navigate("functionTest") }) {
+                Text(text = "Go to Function Test")
             }
         }
     }
