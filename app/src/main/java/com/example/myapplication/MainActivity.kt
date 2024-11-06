@@ -1,6 +1,7 @@
-// MainActivity.kt with navigation buttons
+// MainActivity.kt (Complete with Logging)
 package com.example.myapplication
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log // Import logging
 import androidx.activity.ComponentActivity
