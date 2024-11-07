@@ -64,7 +64,8 @@
         android:text="Log in"
         app:layout_constraintEnd_toEndOf="@+id/loginPassword"
         app:layout_constraintStart_toStartOf="@+id/loginPassword"
-        app:layout_constraintTop_toBottomOf="@+id/loginPassword" />
+        app:layout_constraintTop_toBottomOf="@+id/loginPassword"
+        android:background="@drawable/btn_shape_round"/>
 
     <TextView
         android:id="@+id/loginOr"
@@ -85,6 +86,6 @@
         app:layout_constraintEnd_toEndOf="@+id/loginOr"
         app:layout_constraintStart_toStartOf="@+id/loginOr"
         app:layout_constraintTop_toBottomOf="@+id/loginOr"
-        />
+        android:background="@drawable/btn_shape_round"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

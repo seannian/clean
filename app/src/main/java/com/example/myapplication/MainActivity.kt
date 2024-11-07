@@ -1,8 +1,7 @@
-// MainActivity.kt with navigation buttons
 package com.example.myapplication
 
 import android.os.Bundle
-import android.util.Log // Import logging
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -41,13 +40,14 @@ fun MainScreen(navController: NavHostController) {
         composable("navigationDrawer") {
             NavigationDrawer()
         }
-        // New Composable Route for FunctionTest
         composable("functionTest") {
             FunctionTest(navController = navController)
         }
-        // New Composable Route for CreateEvent
         composable("createEvent") {
             CreateEvent()
+        }
+        composable("loginScreen") {
+            LoginScreen()
         }
     }
 }
@@ -70,6 +70,9 @@ fun HomeScreen(navController: NavHostController) {
             }
             Button(onClick = { navController.navigate("functionTest") }) {
                 Text(text = "Go to Function Test")
+            }
+            Button(onClick = { navController.navigate("loginScreen") }) {
+                Text(text = "Go to Login Screen")
             }
         }
     }
