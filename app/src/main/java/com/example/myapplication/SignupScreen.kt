@@ -22,12 +22,12 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 import org.checkerframework.checker.units.qual.C
 
 @Composable
-fun LoginScreen() {
+fun SignupScreen() {
     Column(modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-        TitleText("Log In")
+    ) {
+        TitleText("Sign Up")
 
         Spacer(modifier = Modifier.padding(24.dp))
 
@@ -55,11 +55,15 @@ fun LoginScreen() {
 
         Spacer(modifier = Modifier.padding(24.dp))
 
-        FilledButton({}, "Login")
+        var confirmPassword by remember { mutableStateOf("") }
 
-        Spacer(modifier = Modifier.padding(24.dp))
-
-        Text("Or")
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Confirm Password") },
+            maxLines = 1,
+            placeholder = { Text( "Enter Your Password" )}
+        )
 
         Spacer(modifier = Modifier.padding(24.dp))
 
@@ -71,9 +75,9 @@ fun LoginScreen() {
 
 @Preview (showBackground = true)
 @Composable
-fun PreviewLoginScreen() {
+fun PreviewSignupScreen() {
     MyApplicationTheme(dynamicColor = false) {
-        LoginScreen()
+        SignupScreen()
     }
 }
 
