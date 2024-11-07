@@ -49,6 +49,9 @@ fun MainScreen(navController: NavHostController) {
         composable("loginScreen") {
             LoginScreen()
         }
+        composable("signupScreen") {
+            SignupScreen()
+        }
     }
 }
 
@@ -73,6 +76,9 @@ fun HomeScreen(navController: NavHostController) {
             }
             Button(onClick = { navController.navigate("loginScreen") }) {
                 Text(text = "Go to Login Screen")
+            }
+            Button(onClick = { navController.navigate("signupScreen") }) {
+                Text(text = "Go to Signup Screen")
             }
         }
     }
