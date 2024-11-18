@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.ui.theme.Grey
@@ -21,12 +22,13 @@ fun NavDrawerText(content: String, selected: Boolean) {
 }
 
 @Composable
-fun TitleText(content: String) {
+fun TitleText(content: String, padding: Dp) {
     Text(
         text = content,
         fontSize = 48.sp,
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(16.dp),
+        lineHeight = 48.sp,
+        modifier = Modifier.padding(padding),
         color = Color.Black
     )
 }
@@ -38,6 +40,17 @@ fun EventTitleText(content: String) {
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
         color = Color.Black
+    )
+}
+
+@Composable
+fun CreateEventLabel(content: String) {
+    Text(
+        text = content,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color.Black,
+        modifier = Modifier.padding(bottom = 10.dp)
     )
 }
 

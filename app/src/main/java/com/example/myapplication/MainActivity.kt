@@ -37,14 +37,11 @@ fun MainScreen(navController: NavHostController) {
         composable("firebaseLogin") {
             FirebaseLogin()
         }
-        composable("navigationDrawer") {
-            NavigationDrawer()
-        }
         composable("functionTest") {
             FunctionTest(navController = navController)
         }
         composable("createEvent") {
-            CreateEvent()
+            CreateEvent(navController)
         }
         composable("loginScreen") {
             LoginScreen()
@@ -52,6 +49,12 @@ fun MainScreen(navController: NavHostController) {
         composable("signupScreen") {
             SignupScreen()
         }
+        composable("friendScreen") {
+            FriendsScreen()
+        }
+        /*        composable("leaderboardScreen") {
+                    LeaderboardScreen()
+                }*/
     }
 }
 
@@ -68,12 +71,16 @@ fun HomeScreen(navController: NavHostController) {
             Button(onClick = { navController.navigate("firebaseLogin") }) {
                 Text(text = "Go to Firebase Login")
             }
-            Button(onClick = { navController.navigate("navigationDrawer") }) {
-                Text(text = "Go to Navigation Drawer")
-            }
             Button(onClick = { navController.navigate("functionTest") }) {
                 Text(text = "Go to Function Test")
             }
+            Button(onClick = { navController.navigate("friendScreen") }) {
+                Text(text = "Go to Friends Screen")
+            }
+            // need user integration
+            /*            Button(onClick = { navController.navigate("leaderboardScreen") }) {
+                            Text(text = "Go to Leaderboard Screen")
+                        }*/
             Button(onClick = { navController.navigate("loginScreen") }) {
                 Text(text = "Go to Login Screen")
             }

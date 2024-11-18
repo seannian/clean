@@ -23,11 +23,12 @@ import org.checkerframework.checker.units.qual.C
 
 @Composable
 fun SignupScreen() {
-    Column(modifier = Modifier.fillMaxSize(),
+    Column(
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TitleText("Sign Up")
+        TitleText("Sign Up", 16.dp)
 
         Spacer(modifier = Modifier.padding(24.dp))
 
@@ -38,7 +39,7 @@ fun SignupScreen() {
             onValueChange = { username = it },
             label = { Text("Username") },
             maxLines = 1,
-            placeholder = { Text( "Enter Your Username" )}
+            placeholder = { Text("Enter Your Username") }
         )
 
         Spacer(modifier = Modifier.padding(24.dp))
@@ -50,7 +51,7 @@ fun SignupScreen() {
             onValueChange = { password = it },
             label = { Text("Password") },
             maxLines = 1,
-            placeholder = { Text( "Enter Your Password" )}
+            placeholder = { Text("Enter Your Password") }
         )
 
         Spacer(modifier = Modifier.padding(24.dp))
@@ -62,18 +63,18 @@ fun SignupScreen() {
             onValueChange = { confirmPassword = it },
             label = { Text("Confirm Password") },
             maxLines = 1,
-            placeholder = { Text( "Enter Your Password" )}
+            placeholder = { Text("Enter Your Password") }
         )
 
         Spacer(modifier = Modifier.padding(24.dp))
 
-        UnfilledButton({},"Sign Up")
+        UnfilledButton({}, "Sign Up")
 
 
     }
 }
 
-@Preview (showBackground = true)
+@Preview(showBackground = true)
 @Composable
 fun PreviewSignupScreen() {
     MyApplicationTheme(dynamicColor = false) {
