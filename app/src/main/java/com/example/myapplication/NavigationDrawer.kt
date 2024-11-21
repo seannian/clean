@@ -1,4 +1,5 @@
 package com.example.myapplication
+
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,7 @@ enum class Page() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationDrawer() {
+fun NavigationDrawer(user: User) {
     val navController = rememberNavController()
     var currentPage by remember { mutableStateOf(Page.Events) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -59,11 +60,20 @@ fun NavigationDrawer() {
                     IconButton(onClick = {
                         scope.launch { drawerState.close() }
                     }) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close Drawer", tint = BratGreen)
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close Drawer",
+                            tint = BratGreen
+                        )
                     }
                 }
                 NavigationDrawerItem(
-                    label = { NavDrawerText("Leaderboard", if (currentPage == Page.Leaderboard) true else false) },
+                    label = {
+                        NavDrawerText(
+                            "Leaderboard",
+                            if (currentPage == Page.Leaderboard) true else false
+                        )
+                    },
                     selected = if (currentPage == Page.Leaderboard) true else false,
                     onClick = {
                         scope.launch {
@@ -77,7 +87,12 @@ fun NavigationDrawer() {
                     )
                 )
                 NavigationDrawerItem(
-                    label = { NavDrawerText("Events", if (currentPage == Page.Events) true else false) },
+                    label = {
+                        NavDrawerText(
+                            "Events",
+                            if (currentPage == Page.Events) true else false
+                        )
+                    },
                     selected = if (currentPage == Page.Events) true else false,
                     onClick = {
                         scope.launch {
@@ -91,7 +106,12 @@ fun NavigationDrawer() {
                     )
                 )
                 NavigationDrawerItem(
-                    label = { NavDrawerText("My Events", if (currentPage == Page.My_Events) true else false) },
+                    label = {
+                        NavDrawerText(
+                            "My Events",
+                            if (currentPage == Page.My_Events) true else false
+                        )
+                    },
                     selected = if (currentPage == Page.My_Events) true else false,
                     onClick = {
                         scope.launch {
@@ -105,7 +125,12 @@ fun NavigationDrawer() {
                     )
                 )
                 NavigationDrawerItem(
-                    label = { NavDrawerText("Past Events", if (currentPage == Page.Past_Events) true else false) },
+                    label = {
+                        NavDrawerText(
+                            "Past Events",
+                            if (currentPage == Page.Past_Events) true else false
+                        )
+                    },
                     selected = if (currentPage == Page.Past_Events) true else false,
                     onClick = {
                         scope.launch {
@@ -119,7 +144,12 @@ fun NavigationDrawer() {
                     )
                 )
                 NavigationDrawerItem(
-                    label = { NavDrawerText("Friends", if (currentPage == Page.Friends) true else false) },
+                    label = {
+                        NavDrawerText(
+                            "Friends",
+                            if (currentPage == Page.Friends) true else false
+                        )
+                    },
                     selected = if (currentPage == Page.Friends) true else false,
                     onClick = {
                         scope.launch {
@@ -173,10 +203,10 @@ fun NavigationDrawer() {
                     startDestination = "events", // Set initial screen
                     modifier = Modifier.padding(paddingValues)
                 ) {
-                    composable("leaderboard") { LeaderboardScreen() }
+                    composable("leaderboard") { LeaderboardScreen(user) }
                     composable("events") { EventsScreen() }
-                    composable("my_events") { MyEventsScreen(true) }
-                    composable("past_events") { MyEventsScreen(false) }
+                    composable("my_events") { MyEventsScreen(user, true) }
+                    composable("past_events") { MyEventsScreen(user, false) }
                     composable("friends") { FriendsScreen() }
                 }
             }

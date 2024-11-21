@@ -102,7 +102,7 @@ fun EventComponent(event: Event) {
     ) {
         ClockIcon()
         Spacer(modifier = Modifier.width(10.dp))
-        SubText(event.time, Grey)
+        SubText(event.startTime, Grey)
     }
     Row(
         modifier = Modifier
