@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,10 +20,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.ui.theme.MyApplicationTheme
-import org.checkerframework.checker.units.qual.C
+import com.google.firebase.auth.FirebaseAuth
+import android.widget.Toast
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(navigateToMainScreen: () -> Unit) {
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -32,19 +39,18 @@ fun LoginScreen() {
 
         Spacer(modifier = Modifier.padding(24.dp))
 
-        var username by remember { mutableStateOf("") }
+        var email by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
 
         OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Username") },
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
             maxLines = 1,
-            placeholder = { Text("Enter Your Username") }
+            placeholder = { Text("Enter Your Email") }
         )
 
-        Spacer(modifier = Modifier.padding(24.dp))
-
-        var password by remember { mutableStateOf("") }
+        Spacer(modifier = Modifier.padding(16.dp))
 
         OutlinedTextField(
             value = password,
@@ -56,25 +62,46 @@ fun LoginScreen() {
 
         Spacer(modifier = Modifier.padding(24.dp))
 
-        FilledButton({}, "Login")
+        Button(
+            onClick = {
+                loginUser(auth, email, password, context, navigateToMainScreen)
+            }
+        ) {
+            Text("Login")
+        }
 
-        Spacer(modifier = Modifier.padding(24.dp))
+        Spacer(modifier = Modifier.padding(16.dp))
 
         Text("Or")
 
-        Spacer(modifier = Modifier.padding(24.dp))
+        Spacer(modifier = Modifier.padding(16.dp))
 
-        UnfilledButton({}, "Sign Up")
-
-
+        Button(onClick = {
+            // Navigate to the Sign Up Screen (Implement Sign Up Screen Navigation here)
+        }) {
+            Text("Sign Up")
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewLoginScreen() {
-    MyApplicationTheme(dynamicColor = false) {
-        LoginScreen()
+fun loginUser(
+    auth: FirebaseAuth,
+    email: String,
+    password: String,
+    context: Context,
+    navigateToMainScreen: () -> Unit
+) {
+    if (email.isNotEmpty() && password.isNotEmpty()) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                    navigateToMainScreen() // Navigate to main screen
+                } else {
+                    Toast.makeText(context, "Login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+    } else {
+        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
     }
 }
-

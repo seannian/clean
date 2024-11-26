@@ -44,7 +44,7 @@ fun MainScreen(navController: NavHostController) {
             CreateEvent(navController)
         }
         composable("loginScreen") {
-            LoginScreen()
+            LoginScreen(navigateToMainScreen = { navController.navigate("home") })
         }
         composable("signupScreen") {
             SignupScreen()
@@ -52,9 +52,6 @@ fun MainScreen(navController: NavHostController) {
         composable("friendScreen") {
             FriendsScreen()
         }
-        /*        composable("leaderboardScreen") {
-                    LeaderboardScreen()
-                }*/
     }
 }
 
@@ -77,10 +74,6 @@ fun HomeScreen(navController: NavHostController) {
             Button(onClick = { navController.navigate("friendScreen") }) {
                 Text(text = "Go to Friends Screen")
             }
-            // need user integration
-            /*            Button(onClick = { navController.navigate("leaderboardScreen") }) {
-                            Text(text = "Go to Leaderboard Screen")
-                        }*/
             Button(onClick = { navController.navigate("loginScreen") }) {
                 Text(text = "Go to Login Screen")
             }
