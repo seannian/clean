@@ -28,9 +28,10 @@ import com.google.firebase.Timestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateEvent(navController: NavController) {
+fun CreateEvent(user: User?, navController: NavController) {
+    // State variables for user inputs
     var title by remember { mutableStateOf("") }
-    var author = ""
+    var author = user
     var eventPicUri by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var startTime by remember { mutableStateOf<Timestamp?>(null) }
@@ -239,46 +240,47 @@ fun CreateEvent(navController: NavController) {
                 {
                     val maxAttendeesInt = maxAttendees.toIntOrNull() ?: 0
                     val pointsInt = points.toIntOrNull() ?: 0
-
-                    val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-                    val parsedDate = dateFormat.parse(date)
-                    val timestampDate = if (parsedDate != null) Timestamp(parsedDate) else Timestamp.now()
-
-                    val event = Event(
-                        title = title,
-                        author = "",
-                        eventPicUri = eventPicUri,
-                        date = timestampDate,
-                        startTime = startTime,
-                        endTime = endTime,
-                        location = location,
-                        description = description,
-                        maxAttendees = maxAttendeesInt,
-                        points = pointsInt
-                    )
+                    val event = user?.let {
+                        Event(
+                            title = title,
+                            author = it.username,
+                            eventPicUri = eventPicUri,
+                            date = date,
+                            startTime = startTime,
+                            endTime = endTime,
+                            location = location,
+                            description = description,
+                            maxAttendees = maxAttendeesInt,
+                            points = pointsInt
+                        )
+                    }
 
                     isLoading = true
-                    db.collection("Events")
-                        .add(event)
-                        .addOnSuccessListener { documentReference ->
-                            isLoading = false
-                            feedbackMessage =
-                                "Event created successfully with ID: ${documentReference.id}"
-                            title = ""
-                            author = ""
-                            eventPicUri = ""
-                            date = ""
-                            startTime = null
-                            endTime = null
-                            location = ""
-                            description = ""
-                            maxAttendees = ""
-                            points = ""
-                        }
-                        .addOnFailureListener { e ->
-                            isLoading = false
-                            feedbackMessage = "Error adding event: ${e.message}"
-                        }
+                  
+                    if (event != null) {
+                        db.collection("Events")
+                            .add(event)
+                            .addOnSuccessListener { documentReference ->
+                                isLoading = false
+                                feedbackMessage =
+                                    "Event created successfully with ID: ${documentReference.id}"
+                                // Clear input fields
+                                title = ""
+                                author = user
+                                eventPicUri = ""
+                                date = ""
+                                startTime = ""
+                                endTime = ""
+                                location = ""
+                                description = ""
+                                maxAttendees = ""
+                                points = ""
+                            }
+                            .addOnFailureListener { e ->
+                                isLoading = false
+                                feedbackMessage = "Error adding event: ${e.message}"
+                            }
+                    }
                 },
                 "Create Event"
             )

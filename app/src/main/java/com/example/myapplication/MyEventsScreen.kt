@@ -17,12 +17,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.Timestamp
 
 @Composable
-fun MyEventsScreen(user: User, isMyEvents: Boolean) { // doubles as Past Events screen
+fun MyEventsScreen(
+    user: User,
+    isMyEvents: Boolean,
+    navController: NavController
+) { // doubles as Past Events screen
     val allEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
     val isLoading = remember { mutableStateOf(true) }
 
@@ -55,7 +64,7 @@ fun MyEventsScreen(user: User, isMyEvents: Boolean) { // doubles as Past Events 
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TitleText(if (isMyEvents) "My Events" else "Past Events", 16.dp)
+        TitleText(if (isMyEvents) "My Events" else "Past Events", 32.dp)
 
         if (isLoading.value) {
             Box(
@@ -68,7 +77,6 @@ fun MyEventsScreen(user: User, isMyEvents: Boolean) { // doubles as Past Events 
             }
         } else {
             LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 8.dp)) {
-                item { TitleText("Events", 16.dp) }
                 if (allEvents.value.isNotEmpty()) {
                     items(allEvents.value) { event ->
                         EventComponent(event)
@@ -84,5 +92,27 @@ fun MyEventsScreen(user: User, isMyEvents: Boolean) { // doubles as Past Events 
                 }
             }
         }
+        if (isMyEvents) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 32.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                ) {
+                    HostCleanupButton(
+                        onClick = { navigateToCreateEvent(navController) },
+                        "Host a Clean-up"
+                    )
+                }
+            }
+        }
     }
+}
+
+fun navigateToCreateEvent(navController: NavController) {
+    navController.navigate("create_events")
 }
