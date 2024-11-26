@@ -24,7 +24,6 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.Timestamp
 
 @Composable
 fun MyEventsScreen(
