@@ -45,9 +45,6 @@ fun MainScreen(navController: NavHostController) {
         composable("functionTest") {
             FunctionTest(navController = navController)
         }
-        composable("createEvent") {
-            CreateEvent(navController)
-        }
         composable("loginScreen") {
             LoginScreen(navigateToMainScreen = { navController.navigate("home") })
         }
@@ -79,9 +76,6 @@ fun HomeScreen(navController: NavHostController) {
         ) {
             Button(onClick = { navController.navigate("firebaseLogin") }) {
                 Text(text = "Go to Firebase Login")
-            }
-            Button(onClick = { navController.navigate("functionTest") }) {
-                Text(text = "Go to Function Test")
             }
             Button(onClick = { navController.navigate("friendScreen") }) {
                 Text(text = "Go to Friends Screen")

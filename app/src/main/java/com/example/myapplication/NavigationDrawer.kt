@@ -237,12 +237,15 @@ fun NavigationDrawer() {
                     }
                     composable("events") { EventsScreen() }
                     composable("my_events") {
-                        user?.let { MyEventsScreen(it, true) }
+                        user?.let { MyEventsScreen(it, true, navController) }
                     }
                     composable("past_events") {
-                        user?.let { MyEventsScreen(it, false) }
+                        user?.let { MyEventsScreen(it, false, navController) }
                     }
                     composable("friends") { FriendsScreen() }
+                    composable("create_events") {
+                        user?.let { CreateEvent(it, navController) }
+                    }
                 }
             }
         )
