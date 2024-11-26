@@ -3,17 +3,7 @@ package com.example.myapplication
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DateRange
@@ -29,34 +19,50 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.example.myapplication.ui.theme.BratGreen
 import com.example.myapplication.ui.theme.Grey
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun EventComponent(event: Event) {
-    val svgPainter = painterResource(id = R.drawable.cs_160_project_logo)
+    val placeholderPainter = painterResource(id = R.drawable.cs_160_project_logo)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 0.dp),
     ) {
         Column(modifier = Modifier.height(100.dp)) {
-
-//                Image(
-//                    painter = rememberAsyncImagePainter(if (event.eventPicUri == "") svgPainter else event.eventPicUri),
-//                    contentDescription = "Event picture",
-//                    modifier = Modifier.fillMaxSize()
-//                        .clip(RoundedCornerShape(10.dp)),
-//                    contentScale = ContentScale.Crop
-//                )
             Box(
                 modifier = Modifier
                     .size(100.dp, 100.dp)
                     .background(Color.Gray)
                     .clip(RoundedCornerShape(10.dp))
             ) {
-
+                if (event.eventPicUri.isNotEmpty()) {
+                    AsyncImage(
+                        model = event.eventPicUri,
+                        contentDescription = "Event picture",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(10.dp)),
+                        contentScale = ContentScale.Crop,
+                        placeholder = placeholderPainter,
+                        error = placeholderPainter
+                    )
+                } else {
+                    Image(
+                        painter = placeholderPainter,
+                        contentDescription = "Placeholder Image",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(10.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
         }
         Column(
@@ -91,7 +97,7 @@ fun EventComponent(event: Event) {
     ) {
         Icon(imageVector = Icons.Outlined.DateRange, contentDescription = "Date Icon", tint = Grey)
         Spacer(modifier = Modifier.width(10.dp))
-        SubText(event.date, Grey)
+        SubText(event.date?.toFormattedString("MM-dd-yyyy") ?: "Date not set", Grey)
     }
     Row(
         modifier = Modifier
@@ -102,7 +108,18 @@ fun EventComponent(event: Event) {
     ) {
         ClockIcon()
         Spacer(modifier = Modifier.width(10.dp))
-        SubText(event.startTime, Grey)
+        SubText(event.startTime?.toFormattedString("hh:mm a") ?: "Start time not set", Grey)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, top = 10.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ClockIcon()
+        Spacer(modifier = Modifier.width(10.dp))
+        SubText(event.endTime?.toFormattedString("hh:mm a") ?: "End time not set", Grey)
     }
     Row(
         modifier = Modifier
@@ -113,7 +130,7 @@ fun EventComponent(event: Event) {
     ) {
         Icon(imageVector = Icons.Outlined.Place, contentDescription = "Location Icon", tint = Grey)
         Spacer(modifier = Modifier.width(10.dp))
-        SubText(event.location, Grey)
+        SubText(if (event.location.isNotEmpty()) event.location else "Location not set", Grey)
     }
     Row(
         modifier = Modifier
@@ -125,7 +142,7 @@ fun EventComponent(event: Event) {
         Icon(imageVector = Icons.Outlined.Person, contentDescription = "Attendee Icon", tint = Grey)
         Spacer(modifier = Modifier.width(10.dp))
         SubText(
-            if (event.maxAttendees == 1) event.maxAttendees.toString() + " person maximum" else event.maxAttendees.toString() + " people maximum",
+            if (event.maxAttendees == 1) "${event.maxAttendees} person maximum" else "${event.maxAttendees} people maximum",
             Grey
         )
     }
@@ -139,7 +156,7 @@ fun EventComponent(event: Event) {
         Icon(imageVector = Icons.Outlined.Star, contentDescription = "Star Icon", tint = BratGreen)
         Spacer(modifier = Modifier.width(10.dp))
         SubText(
-            if (event.points == 1) event.points.toString() + " point" else event.points.toString() + " points",
+            if (event.points == 1) "${event.points} point" else "${event.points} points",
             Color.Black
         )
     }
@@ -155,6 +172,10 @@ fun EventComponent(event: Event) {
     }
 }
 
-
-
-
+/**
+ * Extension function to convert Timestamp to a formatted String
+ */
+fun Timestamp.toFormattedString(format: String): String {
+    val sdf = SimpleDateFormat(format, Locale.getDefault())
+    return sdf.format(this.toDate())
+}

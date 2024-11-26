@@ -35,11 +35,11 @@ fun UserTile(user: User) {
         placeholder = painterResource(R.drawable.ic_launcher_background) // Placeholder during loading
     )
 
-    val userName = "Name"
-    val dateMade = "01/01/2003"
-    val cleanups = 0
-    val points = 0
-    val description = "teehee"
+    val userName = user.username
+    val dateMade = user.joinDate
+    val cleanups = user.totalNumberOfCleanups
+    val points = user.score
+    val description = user.description
 
     Column(modifier = Modifier.padding(all = 8.dp)) {
         Row(
@@ -98,8 +98,6 @@ fun UserTile(user: User) {
         Text("About Me")
 
         Text(description)
-
-
 
     }
 }

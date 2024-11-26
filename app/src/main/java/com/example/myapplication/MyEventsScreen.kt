@@ -4,11 +4,9 @@ import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,22 +17,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.maps.android.compose.GoogleMap
+import com.google.firebase.firestore.Query
+import com.google.firebase.Timestamp
 
 @Composable
 fun MyEventsScreen(user: User, isMyEvents: Boolean) { // doubles as Past Events screen
     val allEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
-    var isLoading = remember { mutableStateOf(true) }
+    val isLoading = remember { mutableStateOf(true) }
+
     LaunchedEffect(Unit) {
         try {
             val db = FirebaseFirestore.getInstance()
             val query = db.collection("Events")
-            val queryCondition = if (isMyEvents) query.whereEqualTo(
-                user.username,
-                "author"
-            ) else query.whereGreaterThan(Timestamp.now().toString(), "date")
+
+            val queryCondition: Query = if (isMyEvents) {
+                query.whereEqualTo("author", user.username)
+            } else {
+                query.whereGreaterThan("date", Timestamp.now())
+            }
+
             queryCondition.get()
                 .addOnSuccessListener { events ->
                     allEvents.value = events.mapNotNull { event ->
@@ -51,6 +53,7 @@ fun MyEventsScreen(user: User, isMyEvents: Boolean) { // doubles as Past Events 
             Log.d("Firebase query error", e.message ?: "Unknown error")
         }
     }
+
     Column(modifier = Modifier.fillMaxSize()) {
         TitleText(if (isMyEvents) "My Events" else "Past Events", 16.dp)
 
@@ -67,8 +70,8 @@ fun MyEventsScreen(user: User, isMyEvents: Boolean) { // doubles as Past Events 
             LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 8.dp)) {
                 item { TitleText("Events", 16.dp) }
                 if (allEvents.value.isNotEmpty()) {
-                    allEvents.value.map { event ->
-                        item { EventComponent(event) }
+                    items(allEvents.value) { event ->
+                        EventComponent(event)
                     }
                 } else {
                     item {

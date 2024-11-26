@@ -22,7 +22,6 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemColors
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +35,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import com.example.myapplication.ui.theme.BratGreen
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.runtime.LaunchedEffect
 
 enum class Page() {
     Leaderboard, Events, My_Events, Past_Events, Friends
@@ -43,7 +45,34 @@ enum class Page() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationDrawer(user: User) {
+fun NavigationDrawer() {
+
+    val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
+
+    var user by remember { mutableStateOf<User?>(null) }
+
+    LaunchedEffect(auth.currentUser) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            firestore.collection("Users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        user = document.toObject(User::class.java)
+                        Log.d("Firestore", "User retrieved: $user")
+                    } else {
+                        Log.d("Firestore", "No such document")
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d("Firestore", "get failed with ", exception)
+                }
+        } else {
+            Log.d("Auth", "No authenticated user found")
+        }
+    }
+
     val navController = rememberNavController()
     var currentPage by remember { mutableStateOf(Page.Events) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -203,10 +232,16 @@ fun NavigationDrawer(user: User) {
                     startDestination = "events", // Set initial screen
                     modifier = Modifier.padding(paddingValues)
                 ) {
-                    composable("leaderboard") { LeaderboardScreen(user) }
+                    composable("leaderboard") {
+                        user?.let { LeaderboardScreen(it) }
+                    }
                     composable("events") { EventsScreen() }
-                    composable("my_events") { MyEventsScreen(user, true) }
-                    composable("past_events") { MyEventsScreen(user, false) }
+                    composable("my_events") {
+                        user?.let { MyEventsScreen(it, true) }
+                    }
+                    composable("past_events") {
+                        user?.let { MyEventsScreen(it, false) }
+                    }
                     composable("friends") { FriendsScreen() }
                 }
             }

@@ -1,14 +1,16 @@
 package com.example.myapplication
 
+import com.google.firebase.Timestamp
+
 data class Event(
-    var title: String = "",
-    var author: String = "",
-    var eventPicUri: String = "",
-    var date: String = "",
-    var startTime: String = "",
-    var endTime: String = "",
-    var location: String = "",
-    var description: String = "",
-    var maxAttendees: Int = 0,
-    var points: Int = 3
+    val title: String = "",
+    val author: String = "",
+    val eventPicUri: String = "",
+    val date: Timestamp? = null,  // Use Firestore Timestamp
+    val startTime: Timestamp? = null,  // Changed to Firestore Timestamp
+    val endTime: Timestamp? = null,    // Changed to Firestore Timestamp
+    val location: String = "",
+    val description: String = "",
+    val maxAttendees: Int = 0,
+    val points: Int = 0
 )
