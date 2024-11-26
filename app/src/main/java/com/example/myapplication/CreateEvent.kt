@@ -240,12 +240,15 @@ fun CreateEvent(user: User?, navController: NavController) {
                 {
                     val maxAttendeesInt = maxAttendees.toIntOrNull() ?: 0
                     val pointsInt = points.toIntOrNull() ?: 0
+                    val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                    val parsedDate = dateFormat.parse(date)
+                    val timestampDate = if (parsedDate != null) Timestamp(parsedDate) else Timestamp.now()
                     val event = user?.let {
                         Event(
                             title = title,
                             author = it.username,
                             eventPicUri = eventPicUri,
-                            date = date,
+                            date = timestampDate,
                             startTime = startTime,
                             endTime = endTime,
                             location = location,
@@ -269,8 +272,8 @@ fun CreateEvent(user: User?, navController: NavController) {
                                 author = user
                                 eventPicUri = ""
                                 date = ""
-                                startTime = ""
-                                endTime = ""
+                                startTime = null
+                                endTime = null
                                 location = ""
                                 description = ""
                                 maxAttendees = ""
