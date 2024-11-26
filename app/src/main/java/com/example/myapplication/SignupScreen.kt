@@ -1,4 +1,3 @@
-// SignupScreen.kt
 package com.example.myapplication
 
 import androidx.compose.foundation.layout.*
@@ -9,14 +8,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.TextUnit
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import androidx.compose.ui.unit.TextUnit
+import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.*
+import androidx.navigation.NavController
 
 @Composable
-fun SignupScreen() {
+fun SignupScreen(navigateToMainScreen: () -> Unit) {
     // Initialize Firebase Auth
     val auth = FirebaseAuth.getInstance()
 
@@ -25,11 +31,11 @@ fun SignupScreen() {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var successMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
     // Coroutine scope for asynchronous tasks
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -85,7 +91,6 @@ fun SignupScreen() {
             onClick = {
                 // Clear previous messages
                 errorMessage = null
-                successMessage = null
 
                 // Input validation
                 if (email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
@@ -101,14 +106,47 @@ fun SignupScreen() {
                 // Proceed with sign-up
                 isLoading = true
                 coroutineScope.launch {
-                    auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                        isLoading = false
-                        if (task.isSuccessful) {
-                            successMessage = "Account created successfully."
-                            // You can navigate to another screen or perform other actions here
+                    try {
+                        // Create user with email and password
+                        auth.createUserWithEmailAndPassword(email, password).await()
+                        val currentUser = auth.currentUser
+                        if (currentUser != null) {
+                            val uid = currentUser.uid
+                            val db = FirebaseFirestore.getInstance()
+
+                            // Check if user exists in Firestore
+                            val userDocument = db.collection("Users").document(uid).get().await()
+                            if (userDocument.exists()) {
+                                // User already exists in Firestore
+                                isLoading = false
+                                Toast.makeText(context, "Account created successfully.", Toast.LENGTH_SHORT).show()
+                                navigateToMainScreen()
+                            } else {
+                                // User does not exist in Firestore, create new user document
+                                val joinDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+                                val user = User().apply {
+                                    this.email = currentUser.email ?: ""
+                                    this.username = currentUser.email?.substringBefore("@") ?: "Unknown"
+                                    this.joinDate = joinDate
+                                    // Initialize other fields as needed
+                                    this.description = ""
+                                    this.profilePicture = ""
+                                    this.totalNumberOfCleanups = 0
+                                    this.score = 0
+                                }
+                                // Save to Firestore
+                                db.collection("Users").document(uid).set(user).await()
+                                isLoading = false
+                                Toast.makeText(context, "Account created successfully.", Toast.LENGTH_SHORT).show()
+                                navigateToMainScreen()
+                            }
                         } else {
-                            errorMessage = task.exception?.localizedMessage ?: "Sign Up failed."
+                            isLoading = false
+                            errorMessage = "Failed to get current user."
                         }
+                    } catch (e: Exception) {
+                        isLoading = false
+                        errorMessage = e.localizedMessage ?: "Sign Up failed."
                     }
                 }
             },
@@ -137,15 +175,6 @@ fun SignupScreen() {
                 modifier = Modifier.padding(8.dp)
             )
         }
-
-        // Display success message
-        successMessage?.let { msg ->
-            Text(
-                text = msg,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(8.dp)
-            )
-        }
     }
 }
 
@@ -161,6 +190,6 @@ fun TitleText(text: String, fontSize: TextUnit = 24.sp) {
 @Composable
 fun PreviewSignupScreen() {
     MyApplicationTheme(dynamicColor = false) {
-        SignupScreen()
+        SignupScreen(navigateToMainScreen = {})
     }
 }
