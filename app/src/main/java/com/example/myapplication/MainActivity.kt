@@ -15,6 +15,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,16 +49,23 @@ fun MainScreen(navController: NavHostController) {
             LoginScreen(navigateToMainScreen = { navController.navigate("home") })
         }
         composable("signupScreen") {
-            SignupScreen()
+            SignupScreen(navigateToMainScreen = { navController.navigate("home") })
         }
         composable("friendScreen") {
             FriendsScreen()
+        }
+        // New route for NavigationDrawer
+        composable("navigationDrawer") {
+            NavigationDrawer()
         }
     }
 }
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
+    // State to hold user login status
+    var loginStatus by remember { mutableStateOf("") }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -73,6 +85,23 @@ fun HomeScreen(navController: NavHostController) {
             }
             Button(onClick = { navController.navigate("signupScreen") }) {
                 Text(text = "Go to Signup Screen")
+            }
+            // New Button to navigate to NavigationDrawer
+            Button(onClick = { navController.navigate("navigationDrawer") }) {
+                Text(text = "Open Navigation Drawer")
+            }
+            Button(onClick = {
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                loginStatus = if (currentUser != null) {
+                    "User is logged in: ${currentUser.displayName ?: "Unknown User"}"
+                } else {
+                    "No user is logged in."
+                }
+            }) {
+                Text(text = "Check User Login Status")
+            }
+            if (loginStatus.isNotEmpty()) {
+                Text(text = loginStatus)
             }
         }
     }
