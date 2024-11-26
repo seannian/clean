@@ -31,10 +31,10 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateEvent(navController: NavController) {
+fun CreateEvent(user: User?, navController: NavController) {
     // State variables for user inputs
     var title by remember { mutableStateOf("") }
-    var author = "" // should be user
+    var author = user
     var eventPicUri by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var startTime by remember { mutableStateOf("") }
@@ -258,43 +258,47 @@ fun CreateEvent(navController: NavController) {
                 {
                     val maxAttendeesInt = maxAttendees.toIntOrNull() ?: 0
                     val pointsInt = points.toIntOrNull() ?: 0
-                    val event = Event(
-                        title = title,
-                        author = "", // replace with current user
-                        eventPicUri = eventPicUri,
-                        date = date,
-                        startTime = startTime,
-                        endTime = endTime,
-                        location = location,
-                        description = description,
-                        maxAttendees = maxAttendeesInt,
-                        points = pointsInt
-                    )
+                    val event = user?.let {
+                        Event(
+                            title = title,
+                            author = it.username,
+                            eventPicUri = eventPicUri,
+                            date = date,
+                            startTime = startTime,
+                            endTime = endTime,
+                            location = location,
+                            description = description,
+                            maxAttendees = maxAttendeesInt,
+                            points = pointsInt
+                        )
+                    }
 
                     // Push event to Firebase
                     isLoading = true
-                    db.collection("Events")
-                        .add(event)
-                        .addOnSuccessListener { documentReference ->
-                            isLoading = false
-                            feedbackMessage =
-                                "Event created successfully with ID: ${documentReference.id}"
-                            // Clear input fields
-                            title = ""
-                            author = ""
-                            eventPicUri = ""
-                            date = ""
-                            startTime = ""
-                            endTime = ""
-                            location = ""
-                            description = ""
-                            maxAttendees = ""
-                            points = ""
-                        }
-                        .addOnFailureListener { e ->
-                            isLoading = false
-                            feedbackMessage = "Error adding event: ${e.message}"
-                        }
+                    if (event != null) {
+                        db.collection("Events")
+                            .add(event)
+                            .addOnSuccessListener { documentReference ->
+                                isLoading = false
+                                feedbackMessage =
+                                    "Event created successfully with ID: ${documentReference.id}"
+                                // Clear input fields
+                                title = ""
+                                author = user
+                                eventPicUri = ""
+                                date = ""
+                                startTime = ""
+                                endTime = ""
+                                location = ""
+                                description = ""
+                                maxAttendees = ""
+                                points = ""
+                            }
+                            .addOnFailureListener { e ->
+                                isLoading = false
+                                feedbackMessage = "Error adding event: ${e.message}"
+                            }
+                    }
                 },
                 "Create Event",
             )
