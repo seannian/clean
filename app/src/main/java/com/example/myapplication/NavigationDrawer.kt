@@ -38,6 +38,8 @@ import com.example.myapplication.ui.theme.BratGreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.runtime.LaunchedEffect
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 
 enum class Page() {
     Leaderboard, Events, My_Events, Past_Events, Friends
@@ -235,7 +237,7 @@ fun NavigationDrawer() {
                     composable("leaderboard") {
                         user?.let { LeaderboardScreen(it) }
                     }
-                    composable("events") { EventsScreen() }
+                    composable("events") { EventsScreen(navController) }
                     composable("my_events") {
                         user?.let { MyEventsScreen(it, true, navController) }
                     }
@@ -243,8 +245,11 @@ fun NavigationDrawer() {
                         user?.let { MyEventsScreen(it, false, navController) }
                     }
                     composable("friends") { FriendsScreen() }
-                    composable("create_events") {
-                        user?.let { CreateEvent(it, navController) }
+                    composable(
+                        "create_events/{title}"
+                    ) { backStackEntry ->
+                        val title = backStackEntry.arguments?.getString("title")
+                        user?.let { CreateEvent(it, navController, title) }
                     }
                 }
             }
