@@ -28,7 +28,7 @@ fun TitleText(content: String, padding: Dp) {
         fontSize = 48.sp,
         fontWeight = FontWeight.Bold,
         lineHeight = 48.sp,
-        modifier = Modifier.padding(padding),
+        modifier = Modifier.padding(start = padding, end = padding, top = padding),
         color = Color.Black
     )
 }

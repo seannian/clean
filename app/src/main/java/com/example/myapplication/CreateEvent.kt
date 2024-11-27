@@ -1,7 +1,6 @@
 package com.example.myapplication
 
-import android.icu.text.SimpleDateFormat
-import androidx.compose.foundation.border
+import android.app.TimePickerDialog
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -9,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
@@ -16,18 +16,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.composable
 import com.google.firebase.firestore.FirebaseFirestore
-import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.example.myapplication.ui.theme.BratGreen
 import com.example.myapplication.ui.theme.ForestGreen
 import kotlinx.coroutines.launch
-import java.util.Date
-import java.util.Locale
+import java.text.SimpleDateFormat
+import java.util.*
+import com.google.firebase.Timestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,8 +34,8 @@ fun CreateEvent(user: User?, navController: NavController) {
     var author = user
     var eventPicUri by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
-    var startTime by remember { mutableStateOf("") }
-    var endTime by remember { mutableStateOf("") }
+    var startTime by remember { mutableStateOf<Timestamp?>(null) }
+    var endTime by remember { mutableStateOf<Timestamp?>(null) }
     var location by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var maxAttendees by remember { mutableStateOf("") }
@@ -48,8 +45,10 @@ fun CreateEvent(user: User?, navController: NavController) {
     var feedbackMessage by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
-
     val db = FirebaseFirestore.getInstance()
+
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
 
     Column(
         modifier = Modifier
@@ -58,8 +57,7 @@ fun CreateEvent(user: User?, navController: NavController) {
             .verticalScroll(rememberScrollState())
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
@@ -67,9 +65,7 @@ fun CreateEvent(user: User?, navController: NavController) {
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = 48.sp,
-                modifier = Modifier
-                    .padding(0.dp)
-                    .width(350.dp),
+                modifier = Modifier.width(350.dp),
                 color = Color.Black
             )
             IconButton(
@@ -106,6 +102,7 @@ fun CreateEvent(user: User?, navController: NavController) {
                 unfocusedBorderColor = ForestGreen
             )
         )
+
         CreateEventLabel("Location")
         OutlinedTextField(
             value = location,
@@ -121,8 +118,7 @@ fun CreateEvent(user: User?, navController: NavController) {
         )
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -133,10 +129,8 @@ fun CreateEvent(user: User?, navController: NavController) {
                     onValueChange = { date = it },
                     placeholder = {
                         Text(
-                            SimpleDateFormat(
-                                "MM-dd-yyyy",
-                                Locale.getDefault()
-                            ).format(Date()).replace("-", "/")
+                            SimpleDateFormat("MM-dd-yyyy", Locale.getDefault())
+                                .format(Date()).replace("-", "/")
                         )
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -168,63 +162,56 @@ fun CreateEvent(user: User?, navController: NavController) {
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
                 CreateEventLabel("Start Time")
-                OutlinedTextField(
-                    value = startTime,
-                    onValueChange = { startTime = it },
-                    placeholder = {
-                        Text(
-                            SimpleDateFormat(
-                                "hh:mm a",
-                                Locale.getDefault()
-                            ).format(Date())
-                        )
+                Button(
+                    onClick = {
+                        TimePickerDialog(
+                            context,
+                            { _, hour: Int, minute: Int ->
+                                calendar.set(Calendar.HOUR_OF_DAY, hour)
+                                calendar.set(Calendar.MINUTE, minute)
+                                startTime = Timestamp(calendar.time)
+                            },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            false
+                        ).show()
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    modifier = Modifier
-                        .width(150.dp)
-                        .padding(bottom = 16.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = BratGreen,
-                        unfocusedBorderColor = ForestGreen
-                    )
-                )
+                    colors = ButtonDefaults.buttonColors(containerColor = BratGreen)
+                ) {
+                    Text(text = if (startTime != null) SimpleDateFormat("hh:mm a", Locale.getDefault()).format(startTime!!.toDate()) else "Select Start Time")
+                }
             }
             Column {
                 CreateEventLabel("End Time")
-                OutlinedTextField(
-                    value = endTime,
-                    onValueChange = { endTime = it },
-                    placeholder = {
-                        Text(
-                            SimpleDateFormat(
-                                "hh:mm a",
-                                Locale.getDefault()
-                            ).format(Date())
-                        )
+                Button(
+                    onClick = {
+                        TimePickerDialog(
+                            context,
+                            { _, hour: Int, minute: Int ->
+                                calendar.set(Calendar.HOUR_OF_DAY, hour)
+                                calendar.set(Calendar.MINUTE, minute)
+                                endTime = Timestamp(calendar.time)
+                            },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            false
+                        ).show()
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    modifier = Modifier
-                        .width(150.dp)
-                        .padding(bottom = 16.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = BratGreen,
-                        unfocusedBorderColor = ForestGreen
-                    )
-                )
+                    colors = ButtonDefaults.buttonColors(containerColor = BratGreen)
+                ) {
+                    Text(text = if (endTime != null) SimpleDateFormat("hh:mm a", Locale.getDefault()).format(endTime!!.toDate()) else "Select End Time")
+                }
             }
         }
 
         CreateEventLabel("Upload a Thumbnail")
-        UnfilledButton(
-            {}, "Upload Thumbnail",
-        )
+        UnfilledButton({}, "Upload Thumbnail")
 
         Spacer(modifier = Modifier.padding(bottom = 10.dp))
 
@@ -245,25 +232,23 @@ fun CreateEvent(user: User?, navController: NavController) {
         Spacer(modifier = Modifier.padding(bottom = 16.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            UnfilledButton(
-                {}, "Save as Draft",
-            )
-
-            // Create Event Button
+            UnfilledButton({}, "Save as Draft")
             FilledButton(
                 {
                     val maxAttendeesInt = maxAttendees.toIntOrNull() ?: 0
                     val pointsInt = points.toIntOrNull() ?: 0
+                    val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                    val parsedDate = dateFormat.parse(date)
+                    val timestampDate = if (parsedDate != null) Timestamp(parsedDate) else Timestamp.now()
                     val event = user?.let {
                         Event(
                             title = title,
                             author = it.username,
                             eventPicUri = eventPicUri,
-                            date = date,
+                            date = timestampDate,
                             startTime = startTime,
                             endTime = endTime,
                             location = location,
@@ -273,8 +258,8 @@ fun CreateEvent(user: User?, navController: NavController) {
                         )
                     }
 
-                    // Push event to Firebase
                     isLoading = true
+                  
                     if (event != null) {
                         db.collection("Events")
                             .add(event)
@@ -287,8 +272,8 @@ fun CreateEvent(user: User?, navController: NavController) {
                                 author = user
                                 eventPicUri = ""
                                 date = ""
-                                startTime = ""
-                                endTime = ""
+                                startTime = null
+                                endTime = null
                                 location = ""
                                 description = ""
                                 maxAttendees = ""
@@ -300,7 +285,7 @@ fun CreateEvent(user: User?, navController: NavController) {
                             }
                     }
                 },
-                "Create Event",
+                "Create Event"
             )
         }
 
@@ -311,7 +296,6 @@ fun CreateEvent(user: User?, navController: NavController) {
             )
         }
 
-        // Display feedback message
         if (feedbackMessage.isNotEmpty()) {
             Text(
                 text = feedbackMessage,
@@ -321,8 +305,4 @@ fun CreateEvent(user: User?, navController: NavController) {
             )
         }
     }
-}
-
-fun uploadThumbnail() {
-
 }
