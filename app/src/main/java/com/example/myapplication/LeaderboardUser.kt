@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.theme.BratGreen
 import com.example.myapplication.ui.theme.Bronze
 import com.example.myapplication.ui.theme.Gold
@@ -31,19 +32,21 @@ fun LeaderboardUser(medal: Int, user: User) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (medal < 3) {
-            //calc tint
-            if(medal == 1) {
-                MedalIcon(Gold)
-            } else if(medal == 2) {
-                MedalIcon(Silver)
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            if (medal <= 2) {
+                //calc tint
+                if (medal == 0) {
+                    MedalIcon(Gold)
+                } else if (medal == 1) {
+                    MedalIcon(Silver)
+                } else {
+                    MedalIcon(Bronze)
+                }
             } else {
-                MedalIcon(Bronze)
+                StarIcon()
             }
-        } else {
-            StarIcon()
+            SubText(user.username, Color.Black)
         }
-        SubText(user.username, Color.Black)
         SubText(user.score.toString(), Color.Black)
     }
 }

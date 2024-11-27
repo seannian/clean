@@ -38,9 +38,8 @@ fun FriendsScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) {
-        TitleText("Friends", 16.dp)
+        TitleText("Friends", 32.dp)
         SearchBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
@@ -50,7 +49,7 @@ fun FriendsScreen() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {

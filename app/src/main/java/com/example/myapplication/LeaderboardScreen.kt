@@ -44,9 +44,12 @@ fun LeaderboardScreen(user: User) {
                 .width(100.dp)
         )
         TitleText("Leaderboard", 16.dp)
+        Spacer(modifier = Modifier.padding(bottom = 32.dp))
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(topUsers.size) { index ->

@@ -32,7 +32,6 @@ import java.util.*
 @Composable
 fun EventComponent(event: Event) {
     val placeholderPainter = painterResource(id = R.drawable.cs_160_project_logo)
-
     var user by remember { mutableStateOf<User?>(null) }
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
@@ -206,7 +205,6 @@ fun EventComponent(event: Event) {
                         if (!documents.isEmpty) {
                             val document = documents.documents[0]
                             val eventRef = document.reference
-
                             firestore.runTransaction { transaction ->
                                 val snapshot = transaction.get(eventRef)
                                 val currentAttendees = snapshot.getLong("currentAttendees") ?: 0
@@ -237,7 +235,6 @@ fun EventComponent(event: Event) {
         })
     }
 }
-
 /**
  * Extension function to convert Timestamp to a formatted String
  */

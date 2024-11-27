@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import SearchBar
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +34,7 @@ fun EventsScreen() {
 
     val upcomingEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         try {
@@ -57,6 +59,11 @@ fun EventsScreen() {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        SearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            placeholderText = "Search for other events",
+        )
         GoogleMap(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,6 +83,7 @@ fun EventsScreen() {
         } else {
             LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 8.dp)) {
                 item { TitleText("Events", 16.dp) }
+                item { Spacer(modifier = Modifier.padding(bottom = 16.dp)) }
                 if (upcomingEvents.value.isNotEmpty()) {
                     items(upcomingEvents.value) { event ->
                         EventComponent(event)

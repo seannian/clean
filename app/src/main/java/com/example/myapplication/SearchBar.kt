@@ -30,7 +30,7 @@ fun SearchBar(
         },
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp)
             .background(backgroundColor, RoundedCornerShape(8.dp)),
         placeholder = {
             Text(placeholderText, color = contentColor.copy(alpha = 0.6f))

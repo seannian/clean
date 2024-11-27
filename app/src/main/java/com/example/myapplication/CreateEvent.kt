@@ -265,7 +265,6 @@ fun CreateEvent(user: User?, navController: NavController) {
                     }
 
                     isLoading = true
-
                     if (event != null) {
                         db.collection("Events")
                             .add(event)
