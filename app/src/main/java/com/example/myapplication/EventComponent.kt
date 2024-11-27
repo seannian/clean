@@ -11,7 +11,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,13 +23,42 @@ import coil.compose.AsyncImage
 import com.example.myapplication.ui.theme.BratGreen
 import com.example.myapplication.ui.theme.Grey
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun EventComponent(event: Event) {
     val placeholderPainter = painterResource(id = R.drawable.cs_160_project_logo)
+    var user by remember { mutableStateOf<User?>(null) }
+    val auth = FirebaseAuth.getInstance()
+    val firestore = FirebaseFirestore.getInstance()
 
+    // Fetch current user data once
+    LaunchedEffect(auth.currentUser) {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            firestore.collection("Users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        user = document.toObject(User::class.java)
+                        Log.d("Firestore", "User retrieved: $user")
+                    } else {
+                        Log.d("Firestore", "No such document")
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d("Firestore", "get failed with ", exception)
+                }
+        } else {
+            Log.d("Auth", "No authenticated user found")
+        }
+    }
+
+    // Event UI Components
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -167,11 +196,45 @@ fun EventComponent(event: Event) {
         horizontalArrangement = Arrangement.End
     ) {
         PrimaryButton("Join", onClick = {
-            Log.d("backend fraud", "button was pushed")
+            user?.let { currentUser ->
+                firestore.collection("Events")
+                    .whereEqualTo("title", event.title)
+                    .whereEqualTo("author", event.author)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        if (!documents.isEmpty) {
+                            val document = documents.documents[0]
+                            val eventRef = document.reference
+                            firestore.runTransaction { transaction ->
+                                val snapshot = transaction.get(eventRef)
+                                val currentAttendees = snapshot.getLong("currentAttendees") ?: 0
+                                val attendeesUsernames = snapshot.get("attendeesUsernames") as? List<String> ?: emptyList()
+
+                                if (!attendeesUsernames.contains(currentUser.username)) {
+                                    val updatedAttendeesUsernames = attendeesUsernames.toMutableList()
+                                    updatedAttendeesUsernames.add(currentUser.username)
+
+                                    transaction.update(eventRef, "currentAttendees", currentAttendees + 1)
+                                    transaction.update(eventRef, "attendeesUsernames", updatedAttendeesUsernames)
+                                }
+                            }.addOnSuccessListener {
+                                Log.d("Firestore", "Event updated successfully with new attendee")
+                            }.addOnFailureListener { e ->
+                                Log.d("Firestore", "Failed to update event: ${e.message}")
+                            }
+                        } else {
+                            Log.d("Firestore", "Event not found")
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.d("Firestore", "Failed to retrieve event: ${e.message}")
+                    }
+            } ?: run {
+                Log.d("Auth", "User not authenticated")
+            }
         })
     }
 }
-
 /**
  * Extension function to convert Timestamp to a formatted String
  */

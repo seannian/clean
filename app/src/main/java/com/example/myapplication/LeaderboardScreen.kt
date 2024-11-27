@@ -44,7 +44,6 @@ fun LeaderboardScreen(user: User) {
                 .width(100.dp)
         )
         TitleText("Leaderboard", 16.dp)
-
         Spacer(modifier = Modifier.padding(bottom = 32.dp))
 
         LazyColumn(

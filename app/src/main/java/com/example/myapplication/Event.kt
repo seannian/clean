@@ -12,5 +12,7 @@ data class Event(
     val location: String = "",
     val description: String = "",
     val maxAttendees: Int = 0,
-    val points: Int = 0
+    val points: Int = 0,
+    val currentAttendees: Int = 0,  // New count for current attendees
+    val attendeesUsernames: List<String> = listOf()  // New list for usernames of attendees
 )

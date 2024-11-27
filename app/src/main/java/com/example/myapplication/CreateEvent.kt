@@ -41,6 +41,10 @@ fun CreateEvent(user: User?, navController: NavController) {
     var maxAttendees by remember { mutableStateOf("") }
     var points by remember { mutableStateOf("") }
 
+    // New state variables for currentAttendees and attendeesUsernames
+    var currentAttendees by remember { mutableStateOf(0) }
+    var attendeesUsernames by remember { mutableStateOf(listOf<String>()) }
+
     var isLoading by remember { mutableStateOf(false) }
     var feedbackMessage by remember { mutableStateOf("") }
 
@@ -254,12 +258,13 @@ fun CreateEvent(user: User?, navController: NavController) {
                             location = location,
                             description = description,
                             maxAttendees = maxAttendeesInt,
-                            points = pointsInt
+                            points = pointsInt,
+                            currentAttendees = currentAttendees,  // Set to initial value
+                            attendeesUsernames = attendeesUsernames // Set to initial value
                         )
                     }
 
                     isLoading = true
-                  
                     if (event != null) {
                         db.collection("Events")
                             .add(event)
@@ -278,6 +283,8 @@ fun CreateEvent(user: User?, navController: NavController) {
                                 description = ""
                                 maxAttendees = ""
                                 points = ""
+                                currentAttendees = 0
+                                attendeesUsernames = listOf()
                             }
                             .addOnFailureListener { e ->
                                 isLoading = false
