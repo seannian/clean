@@ -35,6 +35,7 @@ fun LeaderboardScreen(user: User) {
             .padding(16.dp)
     ) {
         TitleText("Global Impact Bar (60%)", 16.dp)
+        Spacer(modifier = Modifier.padding(bottom = 10.dp))
         LinearProgressBar(0.6f)
         HorizontalDivider(
             color = ForestGreen,
