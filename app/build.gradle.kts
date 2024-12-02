@@ -62,6 +62,7 @@ dependencies {
 
     implementation("com.github.bumptech.glide:glide:4.14.2")
     implementation(libs.androidx.ui.test.android)
+    implementation(libs.androidx.runner)
     kapt("com.github.bumptech.glide:compiler:4.14.2")
 
     // Jetpack Compose and other AndroidX dependencies

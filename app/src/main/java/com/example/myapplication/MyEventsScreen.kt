@@ -87,7 +87,11 @@ fun MyEventsScreen(
             LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
                 if (allEvents.value.isNotEmpty()) {
                     items(allEvents.value) { event ->
-                        EventComponent(event)
+                        EventComponent(
+                            event,
+                            if (isMyEvents) "My Events" else "Past Events",
+                            navController
+                        )
                     }
                 } else {
                     item {
@@ -122,5 +126,6 @@ fun MyEventsScreen(
 }
 
 fun navigateToCreateEvent(navController: NavController) {
-    navController.navigate("create_events")
+    val title = "hi"
+    navController.navigate("create_events/$title")
 }

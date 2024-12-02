@@ -14,6 +14,7 @@ drawerlayout = "1.2.0"
 material = "1.12.0"
 uiTestAndroid = "1.6.6"
 foundationDesktop = "1.7.0"
+runner = "1.5.0"
 
 [libraries]
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
@@ -36,6 +37,7 @@ androidx-drawerlayout = { group = "androidx.drawerlayout", name = "drawerlayout"
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-ui-test-android = { group = "androidx.compose.ui", name = "ui-test-android", version.ref = "uiTestAndroid" }
 androidx-foundation-desktop = { group = "androidx.compose.foundation", name = "foundation-desktop", version.ref = "foundationDesktop" }
+androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

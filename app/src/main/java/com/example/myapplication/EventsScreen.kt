@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -23,7 +24,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun EventsScreen() {
+fun EventsScreen(navController: NavController) {
 
     RequestLocationPermission()
 
@@ -86,7 +87,7 @@ fun EventsScreen() {
                 item { Spacer(modifier = Modifier.padding(bottom = 16.dp)) }
                 if (upcomingEvents.value.isNotEmpty()) {
                     items(upcomingEvents.value) { event ->
-                        EventComponent(event)
+                        EventComponent(event, "Events", navController)
                     }
                 } else {
                     item {

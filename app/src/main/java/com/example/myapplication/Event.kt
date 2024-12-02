@@ -14,5 +14,6 @@ data class Event(
     val maxAttendees: Int = 0,
     val points: Int = 0,
     val currentAttendees: Int = 0,  // New count for current attendees
-    val attendeesUsernames: List<String> = listOf()  // New list for usernames of attendees
+    val attendeesUsernames: List<String> = listOf(),  // New list for usernames of attendees
+    // val draft: Boolean = false, need to add this to the database
 )
