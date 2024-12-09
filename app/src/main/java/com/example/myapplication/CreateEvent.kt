@@ -302,7 +302,11 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                 }
             }
         }
-
+        Spacer(
+            modifier = Modifier
+                .width(10.dp)
+                .padding(bottom = 10.dp)
+        )
         CreateEventLabel("Upload a Thumbnail")
         UnfilledButton({}, "Upload Thumbnail")
 
@@ -338,6 +342,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                         is Timestamp -> {
                             dateValue
                         }
+
                         else -> {
                             Timestamp.now()
                         }
