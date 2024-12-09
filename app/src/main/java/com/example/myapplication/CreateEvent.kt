@@ -317,7 +317,11 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                 }
             }
         }
-
+        Spacer(
+            modifier = Modifier
+                .width(10.dp)
+                .padding(bottom = 10.dp)
+        )
         CreateEventLabel("Upload a Thumbnail")
         UnfilledButton({}, "Upload Thumbnail")
 
@@ -348,9 +352,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                 {
                     val maxAttendeesInt = maxAttendees.toInt() ?: 0
                     val pointsInt = points ?: 0
-
                     val timestampDate = date ?: Timestamp.now()
-
                     val event = user?.let {
                         Event(
                             title = title,

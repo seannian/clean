@@ -187,6 +187,27 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(start = 16.dp, top = 10.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column() {
+            Text(
+                text = "Description",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(modifier = Modifier
+                .width(10.dp)
+                .padding(bottom = 10.dp))
+            SubText(
+                event.description, Grey
+            )
+        }
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(start = 16.dp, end = 32.dp, bottom = 32.dp),
         horizontalArrangement = Arrangement.End
     ) {
