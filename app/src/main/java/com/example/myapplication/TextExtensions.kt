@@ -25,7 +25,7 @@ fun NavDrawerText(content: String, selected: Boolean) {
 fun TitleText(content: String, padding: Dp) {
     Text(
         text = content,
-        fontSize = 48.sp,
+        fontSize = 44.sp,
         fontWeight = FontWeight.Bold,
         lineHeight = 48.sp,
         modifier = Modifier.padding(start = padding, end = padding, top = padding),

@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -21,39 +22,48 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.ui.theme.White
 
 @Composable
-fun FilledButton(onClick: () -> Unit, msg: String) {
+fun FilledButton(onClick: () -> Unit, msg: String, modifierWrapper: Modifier = Modifier) {
     Button(
         onClick = { onClick() },
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.primary,
-        )
+        ),
+        modifier = modifierWrapper
+
     )
     {
         Text(
             text = msg,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
     }
+
 }
 
 @Composable
-fun UnfilledButton(onClick: () -> Unit, msg: String) {
+fun UnfilledButton(onClick: () -> Unit, msg: String, modifierWrapper: Modifier = Modifier) {
     Button(
         onClick = { onClick() },
         colors = ButtonDefaults.buttonColors(
             contentColor = MaterialTheme.colorScheme.secondary,
             containerColor = White
         ),
-        border = BorderStroke(width = 1.dp, color = BratGreen)
+        border = BorderStroke(width = 1.dp, color = BratGreen),
+        modifier = modifierWrapper
     )
     {
         Text(
-            text = msg
+            text = msg,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
     }
 }
