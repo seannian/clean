@@ -29,11 +29,7 @@ fun UserTile(user: User) {
     // Info Date
 
     val imageURL = user.profilePicture
-    val painter = rememberAsyncImagePainter(
-        model = imageURL,
-        error = painterResource(R.drawable.ic_launcher_background), // Fallback image on error
-        placeholder = painterResource(R.drawable.ic_launcher_background) // Placeholder during loading
-    )
+    val painter = rememberImagePainter(imageURL)
 
     val userName = user.username
     val dateMade = user.joinDate
