@@ -333,10 +333,16 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                 {
                     val maxAttendeesInt = maxAttendees.toInt() ?: 0
                     val pointsInt = points ?: 0
-                    val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-                    val parsedDate = dateFormat.parse(date.toString())
-                    val timestampDate =
-                        if (parsedDate != null) Timestamp(parsedDate) else Timestamp.now()
+
+                    val timestampDate = when (val dateValue = date) {
+                        is Timestamp -> {
+                            dateValue
+                        }
+                        else -> {
+                            Timestamp.now()
+                        }
+                    }
+
                     val event = user?.let {
                         Event(
                             title = title,

@@ -46,7 +46,7 @@ fun MyEventsScreen(
             val queryCondition: Query = if (isMyEvents) {
                 query.whereEqualTo("author", user.username)
             } else {
-                query.whereGreaterThan("date", Timestamp.now())
+                query.whereLessThan("date", Timestamp.now())
             }
 
             queryCondition.get()
