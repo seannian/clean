@@ -92,6 +92,21 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
+    fun clearFields() {
+        title = ""
+        author = user
+        eventPicUri = ""
+        date = null
+        startTime = null
+        endTime = null
+        location = ""
+        description = ""
+        maxAttendees = ""
+        points = 0
+        currentAttendees = 0
+        attendeesUsernames = listOf()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -334,14 +349,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                     val maxAttendeesInt = maxAttendees.toInt() ?: 0
                     val pointsInt = points ?: 0
 
-                    val timestampDate = when (val dateValue = date) {
-                        is Timestamp -> {
-                            dateValue
-                        }
-                        else -> {
-                            Timestamp.now()
-                        }
-                    }
+                    val timestampDate = date ?: Timestamp.now()
 
                     val event = user?.let {
                         Event(
@@ -362,31 +370,42 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
 
                     isLoading = true
                     if (event != null) {
-                        // backend needs to make a db call to save existing event
-                        db.collection("Events")
-                            .add(event)
-                            .addOnSuccessListener { documentReference ->
-                                isLoading = false
-                                feedbackMessage =
-                                    "Event created successfully with ID: ${documentReference.id}"
-                                // Clear input fields
-                                title = ""
-                                author = user
-                                eventPicUri = ""
-                                date = null
-                                startTime = null
-                                endTime = null
-                                location = ""
-                                description = ""
-                                maxAttendees = ""
-                                points = 0
-                                currentAttendees = 0
-                                attendeesUsernames = listOf()
-                            }
-                            .addOnFailureListener { e ->
-                                isLoading = false
-                                feedbackMessage = "Error adding event: ${e.message}"
-                            }
+                        if (eventTitle != null && eventTitle != "hi") {
+                            // Edit existing event
+                            db.collection("Events")
+                                .whereEqualTo("title", eventTitle)
+                                .get()
+                                .addOnSuccessListener { querySnapshot ->
+                                    if (!querySnapshot.isEmpty) {
+                                        val document = querySnapshot.documents[0]
+                                        val eventId = document.id
+                                        db.collection("Events").document(eventId).set(event)
+                                            .addOnSuccessListener {
+                                                isLoading = false
+                                                feedbackMessage = "Event updated successfully!"
+                                                clearFields()
+                                            }
+                                            .addOnFailureListener { e ->
+                                                isLoading = false
+                                                feedbackMessage =
+                                                    "Error updating event: ${e.message}"
+                                            }
+                                    }
+                                }
+                        } else {
+                            // Create new event
+                            db.collection("Events")
+                                .add(event)
+                                .addOnSuccessListener { documentReference ->
+                                    isLoading = false
+                                    feedbackMessage = "Event created successfully with ID: ${documentReference.id}"
+                                    clearFields()
+                                }
+                                .addOnFailureListener { e ->
+                                    isLoading = false
+                                    feedbackMessage = "Error adding event: ${e.message}"
+                                }
+                        }
                     }
                 },
                 if (eventTitle != "hi") "Save Published Event" else "Create Event"
