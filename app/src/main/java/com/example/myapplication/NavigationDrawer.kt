@@ -202,8 +202,8 @@ fun NavigationDrawer() {
                             drawerState.close()
                         }
                         auth.signOut()
-                        navController.navigate("loginscreen") {
-                            popUpTo(0) { inclusive = true }
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
                         }
 
                     },
@@ -240,11 +240,19 @@ fun NavigationDrawer() {
                     startDestination = "events", // Set initial screen
                     modifier = Modifier.padding(paddingValues)
                 ) {
-                    composable("loginscreen") { LoginScreen { navController.navigate("events") } }
+                    composable("home") {
+                        HomeScreen(navController = navController)
+                    }
+                    composable("loginScreen") {
+                        LoginScreen(navigateToMainScreen = { navController.navigate("home") })
+                    }
                     composable("leaderboard") {
                         user?.let { LeaderboardScreen(it) }
                     }
                     composable("events") { EventsScreen(navController) }
+                    composable("navigationDrawer") {
+                        MainActivity()
+                    }
                     composable("my_events") {
                         user?.let { MyEventsScreen(it, true, navController) }
                     }
