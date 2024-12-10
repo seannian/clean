@@ -33,7 +33,8 @@ fun EventsScreen(navController: NavController) {
         position = CameraPosition.fromLatLngZoom(sjsu, 15f)
     }
 
-    val upcomingEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
+    val allEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
+    val filteredEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
 
@@ -44,9 +45,11 @@ fun EventsScreen(navController: NavController) {
                 .whereGreaterThanOrEqualTo("date", Timestamp.now())
                 .get()
                 .addOnSuccessListener { events ->
-                    upcomingEvents.value = events.documents.mapNotNull { document ->
+                    val fetchedEvents = events.documents.mapNotNull { document ->
                         document.toObject(Event::class.java)
                     }
+                    allEvents.value = fetchedEvents
+                    filteredEvents.value = fetchedEvents // Initialize with all events
                     isLoading = false
                 }
                 .addOnFailureListener { exception ->
@@ -59,12 +62,24 @@ fun EventsScreen(navController: NavController) {
         }
     }
 
+    LaunchedEffect(searchQuery) {
+        filteredEvents.value = if (searchQuery.isEmpty()) {
+            allEvents.value
+        } else {
+            allEvents.value.filter { event ->
+                event.title.contains(searchQuery, ignoreCase = true) ||
+                        event.description.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         SearchBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it },
             placeholderText = "Search for other events",
         )
+
         GoogleMap(
             modifier = Modifier
                 .fillMaxWidth()
@@ -74,8 +89,7 @@ fun EventsScreen(navController: NavController) {
 
         if (isLoading) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
@@ -85,14 +99,14 @@ fun EventsScreen(navController: NavController) {
             LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 8.dp)) {
                 item { TitleText("Events", 16.dp) }
                 item { Spacer(modifier = Modifier.padding(bottom = 16.dp)) }
-                if (upcomingEvents.value.isNotEmpty()) {
-                    items(upcomingEvents.value) { event ->
+                if (filteredEvents.value.isNotEmpty()) {
+                    items(filteredEvents.value) { event ->
                         EventComponent(event, "Events", navController)
                     }
                 } else {
                     item {
                         Text(
-                            "There are no upcoming events",
+                            "No events match your search",
                             modifier = Modifier.padding(start = 16.dp),
                             color = Color.Gray
                         )
@@ -101,4 +115,4 @@ fun EventsScreen(navController: NavController) {
             }
         }
     }
-}
+}}
