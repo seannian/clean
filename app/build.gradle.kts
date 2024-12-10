@@ -96,7 +96,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.accompanist:accompanist-permissions:0.33.0-alpha")
     implementation("io.coil-kt:coil-compose:2.1.0")
-
+    implementation("com.google.code.gson:gson:2.11.0")
 }
 
 secrets {

@@ -40,6 +40,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.google.gson.Gson
 
 enum class Page() {
     Leaderboard, Events, My_Events, Past_Events, Friends
@@ -48,7 +49,7 @@ enum class Page() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer() {
-
+    val gson = Gson()
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
 
@@ -250,6 +251,25 @@ fun NavigationDrawer() {
                     ) { backStackEntry ->
                         val title = backStackEntry.arguments?.getString("title")
                         user?.let { CreateEvent(it, navController, title) }
+                    }
+                    composable(
+                        "attendee_screen/{authorName}/{attendeesUsernames}",
+                    ) { backStackEntry ->
+                        val authorName = backStackEntry.arguments?.getString("authorName")
+                        val attendeesString =
+                            backStackEntry.arguments?.getString("attendeesUsernames")
+                        val attendeesUsernames = attendeesString?.split(",") ?: emptyList()
+                        if (authorName != null) {
+                            Log.d("hello?", authorName)
+                        } else {
+                            Log.d("it was null", "bruh")
+                        }
+                        if (authorName != null) {
+                            AttendeeScreen(
+                                authorName = authorName,
+                                attendeesUsernames = attendeesUsernames
+                            )
+                        }
                     }
                 }
             }

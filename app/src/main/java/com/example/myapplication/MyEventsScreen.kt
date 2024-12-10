@@ -66,60 +66,57 @@ fun MyEventsScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TitleText(if (isMyEvents) "My Events" else "Past Events", 32.dp)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TitleText(if (isMyEvents) "My Events" else "Past Events", 32.dp)
 
-        if (isLoading.value) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
+            if (isLoading.value) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            } else {
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    placeholderText = if (isMyEvents) "Search for your events" else "Search for past events",
                 )
-            }
-        } else {
-            SearchBar(
-                query = searchQuery,
-                onQueryChange = { searchQuery = it },
-                placeholderText = if (isMyEvents) "Search for your events" else "Search for past events",
-            )
-            LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
-                if (allEvents.value.isNotEmpty()) {
-                    items(allEvents.value) { event ->
-                        EventComponent(
-                            event,
-                            if (isMyEvents) "My Events" else "Past Events",
-                            navController
-                        )
-                    }
-                } else {
-                    item {
-                        Text(
-                            "You have not created any events",
-                            modifier = Modifier.padding(start = 16.dp),
-                            color = Color.Gray
-                        )
+                LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
+                    if (allEvents.value.isNotEmpty()) {
+                        items(allEvents.value) { event ->
+                            EventComponent(
+                                event,
+                                if (isMyEvents) "My Events" else "Past Events",
+                                navController
+                            )
+                        }
+                    } else {
+                        item {
+                            Text(
+                                "You have not created any events",
+                                modifier = Modifier.padding(start = 16.dp),
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
             }
         }
+
         if (isMyEvents) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 32.dp)
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                ) {
-                    HostCleanupButton(
-                        onClick = { navigateToCreateEvent(navController) },
-                        "Host a Clean-up"
-                    )
-                }
+                HostCleanupButton(
+                    onClick = { navigateToCreateEvent(navController) },
+                    "Host a Clean-up"
+                )
             }
         }
     }

@@ -323,7 +323,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                 .padding(bottom = 10.dp)
         )
         CreateEventLabel("Upload a Thumbnail")
-        UnfilledButton({}, "Upload Thumbnail")
+        UnfilledButton({}, "Upload Thumbnail", Modifier.width(200.dp))
 
         Spacer(modifier = Modifier.padding(bottom = 10.dp))
 
@@ -345,9 +345,30 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = if (eventTitle != "hi") Arrangement.SpaceEvenly else Arrangement.End
         ) {
-            UnfilledButton({}, "Save as Draft")
+            if (eventTitle != "hi") {
+                UnfilledButton(onClick = {
+                    db.collection("Events")
+                        .whereEqualTo("title", eventTitle)
+                        .get()
+                        .addOnSuccessListener { querySnapshot ->
+                            for (document in querySnapshot) {
+                                document.reference.delete()
+                                    .addOnSuccessListener {
+                                        Log.d("Firestore", "Document deleted successfully")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w("Firestore", "Error deleting document", e)
+                                    }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("Firestore", "Error getting documents", e)
+                        }
+                    navController.popBackStack()
+                }, "Delete", modifierWrapper = Modifier.width(100.dp))
+            }
             FilledButton(
                 {
                     val maxAttendeesInt = maxAttendees.toInt() ?: 0
@@ -400,7 +421,8 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                                 .add(event)
                                 .addOnSuccessListener { documentReference ->
                                     isLoading = false
-                                    feedbackMessage = "Event created successfully with ID: ${documentReference.id}"
+                                    feedbackMessage =
+                                        "Event created successfully with ID: ${documentReference.id}"
                                     clearFields()
                                 }
                                 .addOnFailureListener { e ->
@@ -409,8 +431,10 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                                 }
                         }
                     }
+                    navController.popBackStack()
                 },
-                if (eventTitle != "hi") "Save Published Event" else "Create Event"
+                if (eventTitle != "hi") "Save" else "Create Event",
+                if (eventTitle != "hi") Modifier.width(100.dp) else Modifier.width(150.dp)
             )
         }
 

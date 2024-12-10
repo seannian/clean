@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -64,7 +65,16 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 0.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 0.dp)
+            .clickable {
+                val authorName = event.author
+                val attendeesUsernames =
+                    if (event.attendeesUsernames.isEmpty()) "hi" else event.attendeesUsernames.joinToString(
+                        ","
+                    )
+                Log.d("in event component", authorName)
+                navController.navigate("attendee_screen/$authorName/$attendeesUsernames")
+            },
     ) {
         Column(modifier = Modifier.height(100.dp)) {
             Box(
@@ -197,9 +207,11 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
             )
-            Spacer(modifier = Modifier
-                .width(10.dp)
-                .padding(bottom = 10.dp))
+            Spacer(
+                modifier = Modifier
+                    .width(10.dp)
+                    .padding(bottom = 10.dp)
+            )
             SubText(
                 event.description, Grey
             )
@@ -227,7 +239,7 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
                 } catch (e: Exception) {
                     Log.e("NavigationError", "Error navigating with event JSON", e)
                 }
-            }, "Edit")
+            }, "Edit", modifierWrapper = Modifier.width(100.dp))
         } else {
             PrimaryButton("Join", onClick = {
                 user?.let { currentUser ->
