@@ -201,6 +201,11 @@ fun NavigationDrawer() {
                         scope.launch {
                             drawerState.close()
                         }
+                        auth.signOut()
+                        navController.navigate("loginscreen") {
+                            popUpTo(0) { inclusive = true }
+                        }
+
                     },
                     colors = NavigationDrawerItemDefaults.colors(
                         selectedContainerColor = Color.Transparent
@@ -235,6 +240,7 @@ fun NavigationDrawer() {
                     startDestination = "events", // Set initial screen
                     modifier = Modifier.padding(paddingValues)
                 ) {
+                    composable("loginscreen") { LoginScreen { navController.navigate("events") } }
                     composable("leaderboard") {
                         user?.let { LeaderboardScreen(it) }
                     }
