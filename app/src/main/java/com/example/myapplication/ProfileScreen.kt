@@ -136,7 +136,6 @@ fun friendRequest(user: User) {
                 {},
                 msg = "Accept",
                 modifierWrapper = Modifier.height(32.dp)
-
             )
             UnfilledButton(
                 {},
@@ -144,8 +143,6 @@ fun friendRequest(user: User) {
                 modifierWrapper = Modifier.height(32.dp)
             )
         }
-
-
     }
 }
 
