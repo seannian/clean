@@ -1,7 +1,9 @@
 package com.example.myapplication
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,19 +17,32 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.ui.theme.Grey
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun UserTile(user: User) {
+fun UserTile(user: User, loggedInUser: User) {
 
     // Info Date
-
+    // need to retrieve current logged in user
+    // check if logged in user is same as this user, Edit button
+    // if logged in user is friends with this user, Unfriend button
+    // if logged in user is not friends with this user, Friend button
+    var buttonMsg = "Friend"
+    if (loggedInUser.username == user.username) {
+        buttonMsg = "Edit"
+    }
+    // need to add friend list to user class
     val imageURL = user.profilePicture
     val painter = rememberImagePainter(imageURL)
 
@@ -59,8 +74,18 @@ fun UserTile(user: User) {
         Spacer(modifier = Modifier.height(8.dp))
 
         // join date
-        Row {
-            Icon(imageVector = Icons.Outlined.DateRange, contentDescription = "Date Icon", tint = Grey)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 7.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.DateRange,
+                contentDescription = "Date Icon",
+                tint = Grey
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Text(dateMade)
         }
@@ -68,10 +93,17 @@ fun UserTile(user: User) {
         Spacer(modifier = Modifier.height(4.dp))
 
         // events attended
-        Row {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 7.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 painter = painterResource(R.drawable.clock_icon),
-                contentDescription = "Clock Icon"
+                contentDescription = "Clock Icon",
+                tint = Grey
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text("Complete $cleanups cleanups")
@@ -80,20 +112,60 @@ fun UserTile(user: User) {
         Spacer(modifier = Modifier.height(4.dp))
 
         // points
-        Row{
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 7.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 painter = painterResource(R.drawable.star),
-                contentDescription = "Clock Icon"
+                contentDescription = "Clock Icon",
+                tint = Grey
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(5.dp))
             Text("Earned $points points")
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        Text("About Me")
-
-        Text(description)
-
+        Text(
+            text = "About Me",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(
+            modifier = Modifier
+                .width(20.dp)
+                .padding(bottom = 10.dp)
+        )
+        SubText(
+            if (description == "") "This user has not set a description yet." else description, Grey
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            FilledButton(onClick = {
+                if (buttonMsg == "Edit") {
+                    // navigate to edit description
+                } else if (buttonMsg == "Friend") {
+                    sendFriendRequest()
+                } else {
+                    unFriend()
+                }
+            }, msg = buttonMsg, modifierWrapper = Modifier.width(100.dp))
+        }
     }
+}
+
+fun sendFriendRequest() {
+
+}
+
+fun unFriend() {
+
 }
