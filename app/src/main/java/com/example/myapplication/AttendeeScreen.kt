@@ -30,7 +30,6 @@ fun AttendeeScreen(authorName: String, attendeesUsernames: List<String>) {
     val allAttendees = remember { mutableStateListOf<User>() }
     val loggedInUser = remember { mutableStateOf(User()) }
     val isLoading = remember { mutableStateOf(true) }
-    Log.d("is this working", "bruh")
 
     LaunchedEffect(Unit) {
         val currentUser = auth.currentUser

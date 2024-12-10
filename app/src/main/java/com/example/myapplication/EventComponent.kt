@@ -40,6 +40,7 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
     var user by remember { mutableStateOf<User?>(null) }
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
+    var joinButtonMsg by remember { mutableStateOf("Join") }
 
     LaunchedEffect(auth.currentUser) {
         val currentUser = auth.currentUser
@@ -49,6 +50,9 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
                 .addOnSuccessListener { document ->
                     if (document != null) {
                         user = document.toObject(User::class.java)
+                        if (user?.let { event.attendeesUsernames.contains(it.username) } == true) {
+                            joinButtonMsg = "Unjoin"
+                        }
                         Log.d("Firestore", "User retrieved: $user")
                     } else {
                         Log.d("Firestore", "No such document")
@@ -241,58 +245,77 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
                 }
             }, "Edit", modifierWrapper = Modifier.width(100.dp))
         } else {
-            PrimaryButton("Join", onClick = {
-                user?.let { currentUser ->
-                    firestore.collection("Events")
-                        .whereEqualTo("title", event.title)
-                        .whereEqualTo("author", event.author)
-                        .get()
-                        .addOnSuccessListener { documents ->
-                            if (!documents.isEmpty) {
-                                val document = documents.documents[0]
-                                val eventRef = document.reference
-                                firestore.runTransaction { transaction ->
-                                    val snapshot = transaction.get(eventRef)
-                                    val currentAttendees = snapshot.getLong("currentAttendees") ?: 0
-                                    val attendeesUsernames =
-                                        snapshot.get("attendeesUsernames") as? List<String>
-                                            ?: emptyList()
+            PrimaryButton(joinButtonMsg,
+                onClick = {
+                    user?.let { currentUser ->
+                        firestore.collection("Events")
+                            .whereEqualTo("title", event.title)
+                            .whereEqualTo("author", event.author)
+                            .get()
+                            .addOnSuccessListener { documents ->
+                                if (!documents.isEmpty) {
+                                    val document = documents.documents[0]
+                                    val eventRef = document.reference
+                                    firestore.runTransaction { transaction ->
+                                        val snapshot = transaction.get(eventRef)
+                                        val currentAttendees =
+                                            snapshot.getLong("currentAttendees") ?: 0
+                                        val attendeesUsernames =
+                                            snapshot.get("attendeesUsernames") as? List<String>
+                                                ?: emptyList()
 
-                                    if (!attendeesUsernames.contains(currentUser.username)) {
-                                        val updatedAttendeesUsernames =
-                                            attendeesUsernames.toMutableList()
-                                        updatedAttendeesUsernames.add(currentUser.username)
+                                        if (!attendeesUsernames.contains(currentUser.username)) {
+                                            val updatedAttendeesUsernames =
+                                                attendeesUsernames.toMutableList()
+                                            updatedAttendeesUsernames.add(currentUser.username)
 
-                                        transaction.update(
-                                            eventRef,
-                                            "currentAttendees",
-                                            currentAttendees + 1
+                                            transaction.update(
+                                                eventRef,
+                                                "currentAttendees",
+                                                currentAttendees + 1
+                                            )
+                                            transaction.update(
+                                                eventRef,
+                                                "attendeesUsernames",
+                                                updatedAttendeesUsernames
+                                            )
+                                            joinButtonMsg = "Unjoin"
+                                        } else {
+                                            val updatedAttendeesUsernames =
+                                                attendeesUsernames.toMutableList()
+                                            updatedAttendeesUsernames.remove(currentUser.username)
+
+                                            transaction.update(
+                                                eventRef,
+                                                "currentAttendees",
+                                                if (currentAttendees > 0) currentAttendees - 1 else 0
+                                            )
+                                            transaction.update(
+                                                eventRef,
+                                                "attendeesUsernames",
+                                                updatedAttendeesUsernames
+                                            )
+                                            joinButtonMsg = "Join"
+                                        }
+                                    }.addOnSuccessListener {
+                                        Log.d(
+                                            "Firestore",
+                                            "Event updated successfully with new attendee"
                                         )
-                                        transaction.update(
-                                            eventRef,
-                                            "attendeesUsernames",
-                                            updatedAttendeesUsernames
-                                        )
+                                    }.addOnFailureListener { e ->
+                                        Log.d("Firestore", "Failed to update event: ${e.message}")
                                     }
-                                }.addOnSuccessListener {
-                                    Log.d(
-                                        "Firestore",
-                                        "Event updated successfully with new attendee"
-                                    )
-                                }.addOnFailureListener { e ->
-                                    Log.d("Firestore", "Failed to update event: ${e.message}")
+                                } else {
+                                    Log.d("Firestore", "Event not found")
                                 }
-                            } else {
-                                Log.d("Firestore", "Event not found")
                             }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.d("Firestore", "Failed to retrieve event: ${e.message}")
-                        }
-                } ?: run {
-                    Log.d("Auth", "User not authenticated")
-                }
-            })
+                            .addOnFailureListener { e ->
+                                Log.d("Firestore", "Failed to retrieve event: ${e.message}")
+                            }
+                    } ?: run {
+                        Log.d("Auth", "User not authenticated")
+                    }
+                })
         }
     }
 }
