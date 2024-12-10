@@ -47,6 +47,8 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.Layout
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import java.io.File
+import java.io.InputStreamReader
 import java.net.URLEncoder
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -144,7 +146,18 @@ fun EventsScreen(navController: NavController) {
             }
         } else {
             LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 8.dp)) {
-                item { TitleText("Events", 16.dp) }
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TitleText("Events", 16.dp)
+                        RefreshIcon(onClick = {
+                            markerQuery = ""
+                        })
+                    }
+                }
                 item { Spacer(modifier = Modifier.padding(bottom = 16.dp)) }
                 if (filteredEvents.value.isNotEmpty()) {
                     items(filteredEvents.value) { event ->
@@ -169,8 +182,7 @@ fun CustomMapMarker(
     event: Event,
     onClick: () -> Unit
 ) {
-    val apiKey = getApiKey()
-    val location = getCoordinates(event.location, apiKey)
+    val location = getCoordinates(event.location, "AIzaSyCB90tDKU7br2yap1rANMrLii6BAathdkU")
     Log.d("coordinates", event.title + ": " + location)
     val markerState = remember { MarkerState(position = location) }
     val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 0.dp)
@@ -219,7 +231,9 @@ fun CustomMapMarker(
 }
 
 fun getCoordinates(address: String, apiKey: String): LatLng {
-    val encodedAddress = URLEncoder.encode(address, "UTF-8")
+    val encodedAddress = URLEncoder.encode(address, "UTF-8") // Properly encode the address
+    Log.d("encodedAddress", encodedAddress)
+    Log.d("apiKey", apiKey)
     val url =
         "https://maps.googleapis.com/maps/api/geocode/json?address=$encodedAddress&key=$apiKey"
 
@@ -241,8 +255,9 @@ fun getCoordinates(address: String, apiKey: String): LatLng {
                 val latitude = location.getDouble("lat")
                 val longitude = location.getDouble("lng")
                 latLng = LatLng(latitude, longitude)
+                Log.d("in getCoordinates", latLng.toString())
             } else {
-                println("Error: ${json.getString("status")}")
+                Log.d("in getCoordinates", "Error: ${json.getString("status")}")
             }
         }
         thread.start()
@@ -252,16 +267,4 @@ fun getCoordinates(address: String, apiKey: String): LatLng {
     }
 
     return latLng
-}
-
-fun getApiKey(): String {
-    val properties = Properties()
-    val file = "secrets.properties"
-    try {
-        properties.load(FileInputStream(file))
-        return properties.getProperty("MAPS_API_KEY")
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return ""
 }
