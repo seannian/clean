@@ -28,6 +28,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
+
 @Composable
 fun MyEventsScreen(
     user: User,
@@ -35,6 +36,7 @@ fun MyEventsScreen(
     navController: NavController
 ) { // doubles as Past Events screen
     val allEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
+    val filteredEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
     val isLoading = remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
 
@@ -51,9 +53,11 @@ fun MyEventsScreen(
 
             queryCondition.get()
                 .addOnSuccessListener { events ->
-                    allEvents.value = events.mapNotNull { event ->
+                    val fetchedEvents = events.mapNotNull { event ->
                         event.toObject(Event::class.java)
                     }
+                    allEvents.value = fetchedEvents
+                    filteredEvents.value = fetchedEvents // Initialize with all events
                     isLoading.value = false
                 }
                 .addOnFailureListener { exception ->
@@ -63,6 +67,18 @@ fun MyEventsScreen(
         } catch (e: Exception) {
             isLoading.value = false
             Log.d("Firebase query error", e.message ?: "Unknown error")
+        }
+    }
+
+    // Update filtered events when the search query changes
+    LaunchedEffect(searchQuery) {
+        filteredEvents.value = if (searchQuery.isEmpty()) {
+            allEvents.value
+        } else {
+            allEvents.value.filter { event ->
+                event.title.contains(searchQuery, ignoreCase = true) ||
+                        event.description.contains(searchQuery, ignoreCase = true)
+            }
         }
     }
 
@@ -86,8 +102,8 @@ fun MyEventsScreen(
                     placeholderText = if (isMyEvents) "Search for your events" else "Search for past events",
                 )
                 LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 16.dp)) {
-                    if (allEvents.value.isNotEmpty()) {
-                        items(allEvents.value) { event ->
+                    if (filteredEvents.value.isNotEmpty()) {
+                        items(filteredEvents.value) { event ->
                             EventComponent(
                                 event,
                                 if (isMyEvents) "My Events" else "Past Events",
@@ -97,7 +113,7 @@ fun MyEventsScreen(
                     } else {
                         item {
                             Text(
-                                "You have not created any events",
+                                if (isMyEvents) "No matching events found" else "No past events found",
                                 modifier = Modifier.padding(start = 16.dp),
                                 color = Color.Gray
                             )
