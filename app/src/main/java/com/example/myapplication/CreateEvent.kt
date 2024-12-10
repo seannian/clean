@@ -156,7 +156,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = BratGreen,
                 unfocusedBorderColor = ForestGreen
             )
@@ -172,7 +172,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = BratGreen,
                 unfocusedBorderColor = ForestGreen
             )
@@ -226,7 +226,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                                 }
                             }
                         },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = BratGreen,
                         unfocusedBorderColor = ForestGreen
                     )
@@ -251,7 +251,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                     modifier = Modifier
                         .width(100.dp)
                         .padding(bottom = 16.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = BratGreen,
                         unfocusedBorderColor = ForestGreen
                     )
@@ -335,7 +335,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = BratGreen,
                 unfocusedBorderColor = ForestGreen
             )
