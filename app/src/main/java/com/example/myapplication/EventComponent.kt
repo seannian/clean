@@ -201,7 +201,7 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 10.dp),
+            .padding(start = 16.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
