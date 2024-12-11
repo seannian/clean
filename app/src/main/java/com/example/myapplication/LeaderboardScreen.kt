@@ -14,6 +14,7 @@ import com.google.firebase.firestore.Query
 @Composable
 fun LeaderboardScreen(user: User) {
     var topUsers by remember { mutableStateOf<List<User>>(emptyList()) }
+    var globalProgress by remember { mutableStateOf(0.0f) }
     val db = FirebaseFirestore.getInstance()
 
     LaunchedEffect(Unit) {
@@ -26,6 +27,16 @@ fun LeaderboardScreen(user: User) {
                     document.toObject(User::class.java)
                 }
                 topUsers = users
+
+                val totalScore = users.sumOf { it.score.toLong() }
+                val maxScore = 100
+                globalProgress = totalScore.toFloat() / maxScore.toFloat()
+
+                println("Total Score: $totalScore, Max Score: $maxScore, Progress: $globalProgress")
+            }
+            .addOnFailureListener { e ->
+                println("Error fetching data: ${e.message}")
+                globalProgress = 0.0f
             }
     }
 
@@ -34,9 +45,11 @@ fun LeaderboardScreen(user: User) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        TitleText("Global Impact Bar (60%)", 16.dp)
+        // Use the calculated globalProgress to dynamically show the percentage
+        TitleText("Global Impact Bar (${(globalProgress * 100).toInt()}%)", 16.dp)
         Spacer(modifier = Modifier.padding(bottom = 10.dp))
-        LinearProgressBar(0.6f)
+        globalProgress = 1.0f
+        LinearProgressBar(globalProgress/1.0f)  // Pass the dynamic value here
         HorizontalDivider(
             color = ForestGreen,
             thickness = 5.dp,
