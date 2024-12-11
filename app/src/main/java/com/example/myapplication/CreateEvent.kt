@@ -32,6 +32,12 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import com.google.firebase.Timestamp
+import java.time.Instant
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.net.Uri
+import com.google.firebase.storage.FirebaseStorage
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +91,20 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            // Call the uploadImage function and handle the result in the callback
+            uploadImage(it) { downloadUrl ->
+                if (downloadUrl != null) {
+                    eventPicUri = downloadUrl
+                    Log.d("ImageUpload", "Event Picture URI: $eventPicUri")
+                } else {
+                    Log.e("ImageUpload", "Failed to upload image.")
+                }
+            }
+        }
+    }
 
     fun clearFields() {
         title = ""
@@ -307,7 +327,13 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                 .padding(bottom = 10.dp)
         )
         CreateEventLabel("Upload a Thumbnail")
-        UnfilledButton({}, "Upload Thumbnail", Modifier.width(200.dp))
+        UnfilledButton(
+            onClick = {
+                launcher.launch("image/*")
+            },
+            msg = "Upload Thumbnail",
+            modifierWrapper = Modifier.width(200.dp)
+        )
 
         Spacer(modifier = Modifier.padding(bottom = 10.dp))
 
@@ -356,9 +382,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
             FilledButton(
                 {
                     val maxAttendeesInt = maxAttendees.toIntOrNull() ?: 0
-                    // Set a baseline of 1 point for every event creation (no equation)
                     points = 1
-
                     val timestampDate = date ?: Timestamp.now()
                     val event = user?.let {
                         Event(
