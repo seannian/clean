@@ -103,7 +103,8 @@ fun AttendeeScreen(
     ) {
         if (isLoading.value) {
             CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
             )
         } else {
             LazyColumn {
