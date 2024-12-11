@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,12 +36,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.ui.theme.BratGreen
 import com.example.myapplication.ui.theme.ForestGreen
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun EditUserDescription(navController: NavController) {
+fun EditUserDescription(navController: NavController, user: User) {
 
     var description by remember { mutableStateOf("") }
-
+    val db = FirebaseFirestore.getInstance()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -52,7 +54,7 @@ fun EditUserDescription(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Describe yourself!",
+                text = "Introduce yourself to everyone!",
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = 48.sp,
@@ -84,7 +86,6 @@ fun EditUserDescription(navController: NavController) {
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("") },
             minLines = 7,
             placeholder = { Text("Give a brief description about yourself") },
             modifier = Modifier
@@ -101,7 +102,23 @@ fun EditUserDescription(navController: NavController) {
         )
 
         FilledButton(
-            {},
+            onClick = {
+                db.collection("Users").whereEqualTo("username", user.username)
+                    .get()
+                    .addOnSuccessListener { querySnapshot ->
+                        if (!querySnapshot.isEmpty) {
+                            val userId = querySnapshot.documents[0].id
+                            db.collection("Users").document(userId)
+                                .update("description", description)
+                                .addOnSuccessListener {
+                                    Log.d("edit_description", "Attribute updated successfully!")
+                                }
+                        }
+                        navController.popBackStack()
+                    }.addOnFailureListener {
+                        Log.d("edit_description", "Description could not be saved")
+                    }
+            },
             msg = "Save",
             modifierWrapper = Modifier
                 .width(96.dp)
