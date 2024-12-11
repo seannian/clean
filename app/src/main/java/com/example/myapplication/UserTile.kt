@@ -222,47 +222,64 @@ fun User.sendFriendRequest(recipient: User, onSuccess: () -> Unit, onFailure: (E
 fun User.unFriend(userToUnfriend: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     val firestore = FirebaseFirestore.getInstance()
 
-    // Get the document reference of the user to unfriend
+    // Retrieve the logged-in user's document reference by username
     firestore.collection("Users")
-        .whereEqualTo("username", userToUnfriend.username)
+        .whereEqualTo("username", this.username)
         .get()
-        .addOnSuccessListener { documents ->
-            if (documents.isEmpty) {
-                onFailure(Exception("Recipient user not found"))
+        .addOnSuccessListener { loggedInUserDocuments ->
+            if (loggedInUserDocuments.isEmpty) {
+                onFailure(Exception("Logged-in user not found"))
                 return@addOnSuccessListener
             }
 
-            val document = documents.documents[0]
-            val targetUserRef = document.reference
-            val loggedInUserRef = firestore.collection("Users").document(this.username)
+            val loggedInUserDoc = loggedInUserDocuments.documents[0]
+            val loggedInUserRef = loggedInUserDoc.reference
 
-            firestore.runTransaction { transaction ->
-                val snapshotLoggedInUser = transaction.get(loggedInUserRef)
-                val snapshotUserToUnfriend = transaction.get(targetUserRef)
+            // Retrieve the user to unfriend's document reference by username
+            firestore.collection("Users")
+                .whereEqualTo("username", userToUnfriend.username)
+                .get()
+                .addOnSuccessListener { userToUnfriendDocuments ->
+                    if (userToUnfriendDocuments.isEmpty) {
+                        onFailure(Exception("Recipient user not found"))
+                        return@addOnSuccessListener
+                    }
 
-                // Get friends lists or create an empty list if it doesn't exist
-                val loggedInUserFriends = snapshotLoggedInUser.get("friends") as? MutableList<String> ?: mutableListOf()
-                val userToUnfriendFriends = snapshotUserToUnfriend.get("friends") as? MutableList<String> ?: mutableListOf()
+                    val userToUnfriendDoc = userToUnfriendDocuments.documents[0]
+                    val userToUnfriendRef = userToUnfriendDoc.reference
 
-                // Check if both users are friends
-                if (loggedInUserFriends.contains(userToUnfriend.username) && userToUnfriendFriends.contains(this.username)) {
-                    // Remove each other from friends lists
-                    loggedInUserFriends.remove(userToUnfriend.username)
-                    userToUnfriendFriends.remove(this.username)
+                    // Perform the transaction to update the friends list
+                    firestore.runTransaction { transaction ->
+                        val snapshotLoggedInUser = transaction.get(loggedInUserRef)
+                        val snapshotUserToUnfriend = transaction.get(userToUnfriendRef)
 
-                    // Update the friends lists in Firestore
-                    transaction.update(loggedInUserRef, "friends", loggedInUserFriends)
-                    transaction.update(targetUserRef, "friends", userToUnfriendFriends)
-                } else {
-                    throw Exception("Not friends with this user")
+                        // Get friends lists or create an empty list if it doesn't exist
+                        val loggedInUserFriends = snapshotLoggedInUser.get("friends") as? MutableList<String> ?: mutableListOf()
+                        val userToUnfriendFriends = snapshotUserToUnfriend.get("friends") as? MutableList<String> ?: mutableListOf()
+
+                        // Check if both users are friends
+                        if (loggedInUserFriends.contains(userToUnfriend.username) && userToUnfriendFriends.contains(this.username)) {
+                            // Remove each other from friends lists
+                            loggedInUserFriends.remove(userToUnfriend.username)
+                            userToUnfriendFriends.remove(this.username)
+
+                            // Update the friends lists in Firestore
+                            transaction.update(loggedInUserRef, "friends", loggedInUserFriends)
+                            transaction.update(userToUnfriendRef, "friends", userToUnfriendFriends)
+                        } else {
+                            throw Exception("Not friends with this user")
+                        }
+                    }.addOnSuccessListener {
+                        onSuccess() // Callback to indicate success
+                    }.addOnFailureListener { e ->
+                        onFailure(e) // Handle failure
+                    }
                 }
-            }.addOnSuccessListener {
-                onSuccess() // Callback to indicate success
-            }.addOnFailureListener { e ->
-                onFailure(e) // Handle failure
-            }
+                .addOnFailureListener { e ->
+                    onFailure(e) // Handle failure when fetching the user to unfriend
+                }
         }
         .addOnFailureListener { e ->
-            onFailure(e) // Handle failure when fetching the user
+            onFailure(e) // Handle failure when fetching the logged-in user
         }
 }
