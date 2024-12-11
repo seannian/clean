@@ -49,7 +49,6 @@ enum class Page() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer() {
-    val gson = Gson()
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
 
@@ -280,7 +279,14 @@ fun NavigationDrawer() {
                     }
                     composable("friends") { FriendsScreen(navController) }
                     composable("profile") { ProfileScreen(navController) }
-                    composable("edit_description") { EditUserDescription(navController) }
+                    composable("edit_description") {
+                        user?.let { it1 ->
+                            EditUserDescription(
+                                navController,
+                                it1
+                            )
+                        }
+                    }
                     composable(
                         "create_events/{title}"
                     ) { backStackEntry ->
