@@ -294,7 +294,7 @@ fun NavigationDrawer() {
                         user?.let { CreateEvent(it, navController, title) }
                     }
                     composable(
-                        "attendee_screen/{authorName}/{attendeesUsernames}",
+                        "attendee_screen/{authorName}/{attendeesUsernames}/{eventTitle}",
                     ) { backStackEntry ->
                         val authorName = backStackEntry.arguments?.getString("authorName")
                         val attendeesString =
@@ -305,10 +305,12 @@ fun NavigationDrawer() {
                         } else {
                             Log.d("it was null", "bruh")
                         }
-                        if (authorName != null) {
+                        val eventTitle = backStackEntry.arguments?.getString("eventTitle")
+                        if (authorName != null && eventTitle != null) {
                             AttendeeScreen(
                                 authorName = authorName,
                                 attendeesUsernames = attendeesUsernames,
+                                eventTitle = eventTitle,
                                 navController = navController
                             )
                         }

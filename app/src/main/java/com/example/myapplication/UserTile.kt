@@ -18,6 +18,8 @@ import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,11 +30,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.ui.theme.Grey
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.concurrent.TimeUnit
 
 @Composable
-fun UserTile(user: User, loggedInUser: User, navController: NavController) {
+fun UserTile(user: User, loggedInUser: User, navController: NavController, event: Event) {
 
     // Info Date
     // need to retrieve current logged in user
@@ -43,15 +48,17 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController) {
     if (loggedInUser.username == user.username) {
         buttonMsg = "Edit"
     }
+    var markedAsAttendedMsg = remember { mutableStateOf("Attended?") }
     // need to add friend list to user class
     val imageURL = user.profilePicture
     val painter = rememberImagePainter(imageURL)
-
+    val db = FirebaseFirestore.getInstance()
     val userName = user.username
     val dateMade = user.joinDate
     val cleanups = user.totalNumberOfCleanups
     val points = user.score
     val description = user.description
+    Log.d("bruh", loggedInUser.username + ", " + event.author)
 
     Column(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
         Row(
@@ -148,8 +155,48 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp, bottom = 16.dp),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = if (event.author != "" && loggedInUser.username == event.author && user.username != event.author) Arrangement.SpaceEvenly else Arrangement.End
         ) {
+            if (event.author != "" && loggedInUser.username == event.author && user.username != event.author) {
+                UnfilledButton(onClick = {
+                    val pointsAdded = event.points.toLong()
+                    if (markedAsAttendedMsg.value == "Attended?") {
+                        markedAsAttendedMsg.value = "Attended!"
+                        db.collection("Users")
+                            .whereEqualTo("username", user.username)
+                            .get()
+                            .addOnSuccessListener { querySnapshot ->
+                                if (!querySnapshot.isEmpty) {
+                                    val userId = querySnapshot.documents[0].id
+                                    db.collection("Users").document(userId)
+                                        .update("score", FieldValue.increment(pointsAdded))
+                                        .addOnSuccessListener {
+                                            Log.d("added points", "Points updated successfully!")
+                                        }
+                                }
+                            }.addOnFailureListener {
+                                Log.d("added points", "Points couldn't be saved")
+                            }
+                    } else if (markedAsAttendedMsg.value == "Attended!") {
+                        markedAsAttendedMsg.value = "Attended?"
+                        db.collection("Users")
+                            .whereEqualTo("username", user.username)
+                            .get()
+                            .addOnSuccessListener { querySnapshot ->
+                                if (!querySnapshot.isEmpty) {
+                                    val userId = querySnapshot.documents[0].id
+                                    db.collection("Users").document(userId)
+                                        .update("score", FieldValue.increment(pointsAdded * -1))
+                                        .addOnSuccessListener {
+                                            Log.d("added points", "Points updated successfully!")
+                                        }
+                                }
+                            }.addOnFailureListener {
+                                Log.d("added points", "Points couldn't be saved")
+                            }
+                    }
+                }, msg = markedAsAttendedMsg.value, modifierWrapper = Modifier.width(150.dp))
+            }
             FilledButton(onClick = {
                 if (buttonMsg == "Edit") {
                     navController.navigate("edit_description")

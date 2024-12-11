@@ -66,7 +66,12 @@ fun ProfileScreen(navController: NavController) {
         item {
             TitleText("My Profile", 0.dp)
 
-            UserTile(user = user.value, loggedInUser = user.value, navController = navController)
+            UserTile(
+                user = user.value,
+                loggedInUser = user.value,
+                navController = navController,
+                event = Event()
+            )
 
 
             TitleText("Friend Requests", 0.dp)

@@ -82,7 +82,10 @@ fun FriendsScreen(navController: NavController) {
                 verticalAlignment = Alignment.Top
             ) {
                 UserTile(
-                    user = user, loggedInUser = loggedInUser.value, navController = navController
+                    user = user,
+                    loggedInUser = loggedInUser.value,
+                    navController = navController,
+                    event = Event()
                 )
 
 //            Button(
