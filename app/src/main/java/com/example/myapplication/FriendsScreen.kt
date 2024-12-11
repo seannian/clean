@@ -85,7 +85,6 @@ fun FriendsScreen(navController: NavController) {
                 placeholderText = "Search for your friends",
             )
         }
-
         // List of filtered friends
         if (filteredFriends.isNotEmpty()) {
             items(filteredFriends) { friendUsername ->

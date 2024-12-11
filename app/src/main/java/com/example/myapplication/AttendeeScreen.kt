@@ -27,14 +27,18 @@ import com.google.firebase.auth.FirebaseAuth
 fun AttendeeScreen(
     authorName: String,
     attendeesUsernames: List<String>,
+    eventTitle: String,
     navController: NavController
 ) {
     val db = FirebaseFirestore.getInstance()
     val author = remember { mutableStateOf(User()) }
+    val event = remember { mutableStateOf(Event()) }
     val auth = FirebaseAuth.getInstance()
     val allAttendees = remember { mutableStateListOf<User>() }
     val loggedInUser = remember { mutableStateOf(User()) }
     val isLoading = remember { mutableStateOf(true) }
+
+    Log.d("eventTitle", eventTitle)
 
     LaunchedEffect(Unit) {
         val currentUser = auth.currentUser
@@ -79,6 +83,17 @@ fun AttendeeScreen(
             }
         }
 
+        val eventQuerySnapshot = db.collection("Events")
+            .whereEqualTo("title", eventTitle)
+            .get()
+            .await()
+
+        if (!eventQuerySnapshot.isEmpty) {
+            val document = eventQuerySnapshot.documents[0]
+            event.value = document.toObject(Event::class.java)!!
+            Log.d("finished fetching", event.value.title)
+        }
+
         // Update loading state after fetching data
         isLoading.value = false
     }
@@ -104,7 +119,8 @@ fun AttendeeScreen(
                         UserTile(
                             user = author.value,
                             loggedInUser = loggedInUser.value,
-                            navController = navController
+                            navController = navController,
+                            event = event.value
                         )
                     }
 
@@ -122,7 +138,8 @@ fun AttendeeScreen(
                                 UserTile(
                                     user = attendee,
                                     loggedInUser = loggedInUser.value,
-                                    navController = navController
+                                    navController = navController,
+                                    event = event.value
                                 )
                             }
                         } else {

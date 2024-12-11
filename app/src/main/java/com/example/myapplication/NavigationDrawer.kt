@@ -49,7 +49,6 @@ enum class Page() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer() {
-    val gson = Gson()
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
 
@@ -280,7 +279,14 @@ fun NavigationDrawer() {
                     }
                     composable("friends") { FriendsScreen(navController) }
                     composable("profile") { ProfileScreen(navController) }
-                    composable("edit_description") { EditUserDescription(navController) }
+                    composable("edit_description") {
+                        user?.let { it1 ->
+                            EditUserDescription(
+                                navController,
+                                it1
+                            )
+                        }
+                    }
                     composable(
                         "create_events/{title}"
                     ) { backStackEntry ->
@@ -288,7 +294,7 @@ fun NavigationDrawer() {
                         user?.let { CreateEvent(it, navController, title) }
                     }
                     composable(
-                        "attendee_screen/{authorName}/{attendeesUsernames}",
+                        "attendee_screen/{authorName}/{attendeesUsernames}/{eventTitle}",
                     ) { backStackEntry ->
                         val authorName = backStackEntry.arguments?.getString("authorName")
                         val attendeesString =
@@ -299,10 +305,12 @@ fun NavigationDrawer() {
                         } else {
                             Log.d("it was null", "bruh")
                         }
-                        if (authorName != null) {
+                        val eventTitle = backStackEntry.arguments?.getString("eventTitle")
+                        if (authorName != null && eventTitle != null) {
                             AttendeeScreen(
                                 authorName = authorName,
                                 attendeesUsernames = attendeesUsernames,
+                                eventTitle = eventTitle,
                                 navController = navController
                             )
                         }

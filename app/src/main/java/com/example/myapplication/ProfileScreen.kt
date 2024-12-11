@@ -69,10 +69,10 @@ fun ProfileScreen(navController: NavController) {
         item {
             TitleText("My Profile", 0.dp)
         }
-
+        
         // Profile User Tile
         item {
-            UserTile(user = user.value, loggedInUser = user.value, navController = navController)
+            UserTile(user = user.value, loggedInUser = user.value, navController = navController, event = Event())
         }
 
         // Add Friend Requests as another item
