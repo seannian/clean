@@ -159,15 +159,7 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
         ) {
             if (event.author != "" && loggedInUser.username == event.author && user.username != event.author) {
                 UnfilledButton(onClick = {
-                    val differenceInMillis = ((event.endTime?.seconds ?: Timestamp(
-                        1702195200,
-                        0
-                    ).seconds) * 1000) - ((event.startTime?.seconds ?: Timestamp(
-                        1702195200,
-                        0
-                    ).seconds) * 1000)
-                    val hours = TimeUnit.MILLISECONDS.toHours(differenceInMillis)
-                    val pointsAdded = event.attendeesUsernames.size * hours
+                    val pointsAdded = event.points.toLong()
                     if (markedAsAttendedMsg.value == "Attended?") {
                         markedAsAttendedMsg.value = "Attended!"
                         db.collection("Users")
