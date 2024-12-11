@@ -15,6 +15,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.myapplication.ui.theme.MyApplicationTheme
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.TextUnit
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
@@ -22,7 +26,7 @@ import java.util.*
 import androidx.navigation.NavController
 
 @Composable
-fun SignupScreen(navigateToMainScreen: () -> Unit) {
+fun SignupScreen(navController: NavController) {
     // Initialize Firebase Auth
     val auth = FirebaseAuth.getInstance()
 
@@ -38,55 +42,40 @@ fun SignupScreen(navigateToMainScreen: () -> Unit) {
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp), // Added padding for better layout
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TitleText("Sign Up", 24.sp) // Updated to 24.sp for default title size
+        TitleText("Sign Up", 16.dp)
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.padding(24.dp))
 
-        // Email Field
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            singleLine = true,
-            placeholder = { Text("Enter Your Email") },
-            modifier = Modifier.fillMaxWidth()
+            maxLines = 1,
+            placeholder = { Text("Enter Your Email") }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.padding(16.dp))
 
-        // Password Field
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            singleLine = true,
-            placeholder = { Text("Enter Your Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+        PasswordOutlinedTextField(
+            password = password,
+            onPasswordChange = { password = it },
+            isConfirm = false
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.padding(16.dp))
 
-        // Confirm Password Field
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
-            singleLine = true,
-            placeholder = { Text("Re-enter Your Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+        PasswordOutlinedTextField(
+            password = confirmPassword,
+            onPasswordChange = { confirmPassword = it },
+            isConfirm = true
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.padding(16.dp))
 
-        // Sign Up Button
         Button(
             onClick = {
                 // Clear previous messages
@@ -119,14 +108,21 @@ fun SignupScreen(navigateToMainScreen: () -> Unit) {
                             if (userDocument.exists()) {
                                 // User already exists in Firestore
                                 isLoading = false
-                                Toast.makeText(context, "Account created successfully.", Toast.LENGTH_SHORT).show()
-                                navigateToMainScreen()
+                                Toast.makeText(
+                                    context,
+                                    "This user already exists. Please log in.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             } else {
                                 // User does not exist in Firestore, create new user document
-                                val joinDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+                                val joinDate = SimpleDateFormat(
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    Locale.getDefault()
+                                ).format(Date())
                                 val user = User().apply {
                                     this.email = currentUser.email ?: ""
-                                    this.username = currentUser.email?.substringBefore("@") ?: "Unknown"
+                                    this.username =
+                                        currentUser.email?.substringBefore("@") ?: "Unknown"
                                     this.joinDate = joinDate
                                     // Initialize other fields as needed
                                     this.description = ""
@@ -137,8 +133,12 @@ fun SignupScreen(navigateToMainScreen: () -> Unit) {
                                 // Save to Firestore
                                 db.collection("Users").document(uid).set(user).await()
                                 isLoading = false
-                                Toast.makeText(context, "Account created successfully.", Toast.LENGTH_SHORT).show()
-                                navigateToMainScreen()
+                                Toast.makeText(
+                                    context,
+                                    "Account created successfully.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                navController.navigate("navigationDrawer")
                             }
                         } else {
                             isLoading = false
@@ -150,9 +150,6 @@ fun SignupScreen(navigateToMainScreen: () -> Unit) {
                     }
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
             enabled = !isLoading
         ) {
             if (isLoading) {
@@ -165,7 +162,17 @@ fun SignupScreen(navigateToMainScreen: () -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        Text("Or")
+
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        Button(onClick = {
+            navController.navigate("loginScreen")
+        }) {
+            Text("Login", fontSize = 16.sp)
+        }
 
         // Display error message
         errorMessage?.let { msg ->
@@ -186,10 +193,27 @@ fun TitleText(text: String, fontSize: TextUnit = 24.sp) {
     )
 }
 
-@Preview(showBackground = true)
 @Composable
-fun PreviewSignupScreen() {
-    MyApplicationTheme(dynamicColor = false) {
-        SignupScreen(navigateToMainScreen = {})
-    }
+fun PasswordOutlinedTextField(
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    isConfirm: Boolean
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        value = password,
+        onValueChange = onPasswordChange,
+        maxLines = 1,
+        label = { if (isConfirm) Text("ConfirmPassword") else Text("Password") },
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        trailingIcon = {
+            if (passwordVisible) VisibilityIcon(onClick = {
+                passwordVisible = false
+            }) else VisibilityCancelIcon(onClick = {
+                passwordVisible = true
+            })
+        }
+    )
 }

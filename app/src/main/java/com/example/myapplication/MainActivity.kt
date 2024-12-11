@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(navController = navController, startDestination = "loginScreen") {
         composable("home") {
             HomeScreen(navController = navController)
         }
@@ -72,10 +72,10 @@ fun MainScreen(navController: NavHostController) {
             FunctionTest(navController = navController)
         }
         composable("loginScreen") {
-            LoginScreen(navigateToMainScreen = { navController.navigate("home") })
+            LoginScreen(navController)
         }
         composable("signupScreen") {
-            SignupScreen(navigateToMainScreen = { navController.navigate("home") })
+            SignupScreen(navController)
         }
         composable("friendScreen") {
             FriendsScreen()
