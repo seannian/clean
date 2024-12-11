@@ -76,8 +76,9 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
                     if (event.attendeesUsernames.isEmpty()) "hi" else event.attendeesUsernames.joinToString(
                         ","
                     )
+                val eventTitle = event.title
                 Log.d("in event component", authorName)
-                navController.navigate("attendee_screen/$authorName/$attendeesUsernames")
+                navController.navigate("attendee_screen/$authorName/$attendeesUsernames/$eventTitle")
             },
     ) {
         Column(modifier = Modifier.height(100.dp)) {
