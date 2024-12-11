@@ -98,7 +98,15 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            eventPicUri = uploadImage(it)
+            // Call the uploadImage function and handle the result in the callback
+            uploadImage(it) { downloadUrl ->
+                if (downloadUrl != null) {
+                    eventPicUri = downloadUrl
+                    Log.d("ImageUpload", "Event Picture URI: $eventPicUri")
+                } else {
+                    Log.e("ImageUpload", "Failed to upload image.")
+                }
+            }
         }
     }
 
