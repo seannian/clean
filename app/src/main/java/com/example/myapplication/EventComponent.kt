@@ -30,9 +30,9 @@ import com.example.myapplication.ui.theme.Grey
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.ceil
 
 @Composable
 fun EventComponent(event: Event, parentPage: String, navController: NavController) {
@@ -76,8 +76,9 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
                     if (event.attendeesUsernames.isEmpty()) "hi" else event.attendeesUsernames.joinToString(
                         ","
                     )
+                val eventTitle = event.title
                 Log.d("in event component", authorName)
-                navController.navigate("attendee_screen/$authorName/$attendeesUsernames")
+                navController.navigate("attendee_screen/$authorName/$attendeesUsernames/$eventTitle")
             },
     ) {
         Column(modifier = Modifier.height(100.dp)) {
@@ -205,7 +206,7 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column() {
+        Column {
             Text(
                 text = "Description",
                 fontSize = 20.sp,
@@ -258,45 +259,41 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
                                     val eventRef = document.reference
                                     firestore.runTransaction { transaction ->
                                         val snapshot = transaction.get(eventRef)
-                                        val currentAttendees =
-                                            snapshot.getLong("currentAttendees") ?: 0
-                                        val attendeesUsernames =
-                                            snapshot.get("attendeesUsernames") as? List<String>
-                                                ?: emptyList()
+                                        val currentAttendees = snapshot.getLong("currentAttendees") ?: 0
+                                        val attendeesUsernames = snapshot.get("attendeesUsernames") as? List<String> ?: emptyList()
+                                        val maxAttendees = snapshot.getLong("maxAttendees") ?: 0
 
-                                        if (!attendeesUsernames.contains(currentUser.username)) {
-                                            val updatedAttendeesUsernames =
-                                                attendeesUsernames.toMutableList()
-                                            updatedAttendeesUsernames.add(currentUser.username)
+                                        val isJoining = !attendeesUsernames.contains(currentUser.username)
 
-                                            transaction.update(
-                                                eventRef,
-                                                "currentAttendees",
-                                                currentAttendees + 1
-                                            )
-                                            transaction.update(
-                                                eventRef,
-                                                "attendeesUsernames",
-                                                updatedAttendeesUsernames
-                                            )
-                                            joinButtonMsg = "Unjoin"
-                                        } else {
-                                            val updatedAttendeesUsernames =
-                                                attendeesUsernames.toMutableList()
-                                            updatedAttendeesUsernames.remove(currentUser.username)
-
-                                            transaction.update(
-                                                eventRef,
-                                                "currentAttendees",
-                                                if (currentAttendees > 0) currentAttendees - 1 else 0
-                                            )
-                                            transaction.update(
-                                                eventRef,
-                                                "attendeesUsernames",
-                                                updatedAttendeesUsernames
-                                            )
-                                            joinButtonMsg = "Join"
+                                        // Prevent joining if the event is at full capacity
+                                        if (isJoining && currentAttendees >= maxAttendees) {
+                                            // Do nothing, or show a message (not shown here)
+                                            return@runTransaction null
                                         }
+
+                                        val newAttendeesCount = if (isJoining) {
+                                            currentAttendees + 1
+                                        } else {
+                                            if (currentAttendees > 0) currentAttendees - 1 else 0
+                                        }
+
+                                        val updatedAttendeesUsernames = attendeesUsernames.toMutableList()
+                                        if (isJoining) {
+                                            updatedAttendeesUsernames.add(currentUser.username)
+                                        } else {
+                                            updatedAttendeesUsernames.remove(currentUser.username)
+                                        }
+
+                                        // Calculate new points based on newAttendeesCount
+                                        // Formula: ceil((newAttendeesCount / 2.0) + 0.5)
+                                        val newPoints = ceil((newAttendeesCount.toDouble() / 2.0) + 0.5).toInt()
+
+                                        transaction.update(eventRef, "currentAttendees", newAttendeesCount)
+                                        transaction.update(eventRef, "attendeesUsernames", updatedAttendeesUsernames)
+                                        transaction.update(eventRef, "points", newPoints)
+
+                                        joinButtonMsg = if (isJoining) "Unjoin" else "Join"
+                                        null
                                     }.addOnSuccessListener {
                                         Log.d(
                                             "Firestore",

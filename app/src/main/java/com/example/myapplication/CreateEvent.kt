@@ -58,11 +58,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
 
     // New state variables for currentAttendees and attendeesUsernames
     var currentAttendees by remember { mutableStateOf(0) }
-    var attendeesUsernames by remember {
-        mutableStateOf(
-            listOf<String>()
-        )
-    }
+    var attendeesUsernames by remember { mutableStateOf(listOf<String>()) }
 
     var showModal by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -167,9 +163,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
         CreateEventLabel("Event Title")
         OutlinedTextField(
             value = title,
-            onValueChange = {
-                title = it
-            },
+            onValueChange = { title = it },
             placeholder = { Text("Enter your event title") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -183,9 +177,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
         CreateEventLabel("Location")
         OutlinedTextField(
             value = location,
-            onValueChange = {
-                location = it
-            },
+            onValueChange = { location = it },
             placeholder = { Text("1 Washington Sq.") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -390,7 +382,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
             FilledButton(
                 {
                     val maxAttendeesInt = maxAttendees.toIntOrNull() ?: 0
-                    val pointsInt = points
+                    points = 1
                     val timestampDate = date ?: Timestamp.now()
                     val event = user?.let {
                         Event(
@@ -403,7 +395,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                             location = location,
                             description = description,
                             maxAttendees = maxAttendeesInt,
-                            points = pointsInt,
+                            points = points,
                             currentAttendees = currentAttendees,
                             attendeesUsernames = attendeesUsernames
                         )
@@ -473,7 +465,6 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
