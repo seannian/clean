@@ -22,12 +22,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.myapplication.ui.theme.BratGreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun FriendsScreen() {
+fun FriendsScreen(navController: NavController) {
     val db = FirebaseFirestore.getInstance()
     val loggedInUser = remember { mutableStateOf(User()) }
     val auth = FirebaseAuth.getInstance()
@@ -81,7 +82,7 @@ fun FriendsScreen() {
                 verticalAlignment = Alignment.Top
             ) {
                 UserTile(
-                    user = user, loggedInUser = loggedInUser.value
+                    user = user, loggedInUser = loggedInUser.value, navController = navController
                 )
 
 //            Button(

@@ -78,7 +78,7 @@ fun MainScreen(navController: NavHostController) {
             SignupScreen(navController)
         }
         composable("friendScreen") {
-            FriendsScreen()
+            FriendsScreen(navController)
         }
         // New route for NavigationDrawer
         composable("navigationDrawer") {
