@@ -45,6 +45,7 @@ import android.view.View
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.Layout
+import com.example.myapplication.ui.theme.BratGreen
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import java.io.File
@@ -145,7 +146,7 @@ fun EventsScreen(navController: NavController) {
                 )
             }
         } else {
-            LazyColumn(modifier = Modifier.padding(start = 16.dp, top = 8.dp)) {
+            LazyColumn(modifier = Modifier.padding(start = 16.dp)) {
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -158,7 +159,6 @@ fun EventsScreen(navController: NavController) {
                         })
                     }
                 }
-                item { Spacer(modifier = Modifier.padding(bottom = 16.dp)) }
                 if (filteredEvents.value.isNotEmpty()) {
                     items(filteredEvents.value) { event ->
                         EventComponent(event, "Events", navController)
@@ -182,7 +182,10 @@ fun CustomMapMarker(
     event: Event,
     onClick: () -> Unit
 ) {
-    val location = getCoordinates(event.location, "") // put your own api key here
+    val location = getCoordinates(
+        event.location,
+        ""
+    ) // put your own api key here
     Log.d("coordinates", event.title + ": " + location)
     val markerState = remember { MarkerState(position = location) }
     val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 0.dp)
@@ -208,7 +211,7 @@ fun CustomMapMarker(
             modifier = Modifier
                 .size(48.dp)
                 .clip(shape)
-                .background(Color.LightGray)
+                .background(BratGreen)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -216,13 +219,15 @@ fun CustomMapMarker(
                 Image(
                     painter = painter,
                     contentDescription = "Profile Image",
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(30.dp)),
                     contentScale = ContentScale.Crop
                 )
             } else {
                 Text(
                     text = event.title.take(1).uppercase(),
-                    color = Color.White,
+                    color = Color.Black,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }

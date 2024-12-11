@@ -43,13 +43,12 @@ import androidx.navigation.navArgument
 import com.google.gson.Gson
 
 enum class Page() {
-    Leaderboard, Events, My_Events, Past_Events, Friends
+    Leaderboard, Events, My_Events, Past_Events, Friends, Profile
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer() {
-    val gson = Gson()
     val auth = FirebaseAuth.getInstance()
     val firestore = FirebaseFirestore.getInstance()
 
@@ -195,6 +194,25 @@ fun NavigationDrawer() {
                     )
                 )
                 NavigationDrawerItem(
+                    label = {
+                        NavDrawerText(
+                            "Profile",
+                            if (currentPage == Page.Profile) true else false
+                        )
+                    },
+                    selected = if (currentPage == Page.Profile) true else false,
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                        }
+                        currentPage = Page.Profile
+                        navController.navigate("profile")
+                    },
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Color.Transparent
+                    )
+                )
+                NavigationDrawerItem(
                     label = { NavDrawerText("Log out", false) },
                     selected = false,
                     onClick = {
@@ -259,7 +277,16 @@ fun NavigationDrawer() {
                     composable("past_events") {
                         user?.let { MyEventsScreen(it, false, navController) }
                     }
-                    composable("friends") { FriendsScreen() }
+                    composable("friends") { FriendsScreen(navController) }
+                    composable("profile") { ProfileScreen(navController) }
+                    composable("edit_description") {
+                        user?.let { it1 ->
+                            EditUserDescription(
+                                navController,
+                                it1
+                            )
+                        }
+                    }
                     composable(
                         "create_events/{title}"
                     ) { backStackEntry ->
@@ -281,7 +308,8 @@ fun NavigationDrawer() {
                         if (authorName != null) {
                             AttendeeScreen(
                                 authorName = authorName,
-                                attendeesUsernames = attendeesUsernames
+                                attendeesUsernames = attendeesUsernames,
+                                navController = navController
                             )
                         }
                     }

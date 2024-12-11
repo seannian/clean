@@ -25,13 +25,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.ui.theme.Grey
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
-fun UserTile(user: User, loggedInUser: User) {
+fun UserTile(user: User, loggedInUser: User, navController: NavController) {
 
     // Info Date
     // need to retrieve current logged in user
@@ -52,7 +53,7 @@ fun UserTile(user: User, loggedInUser: User) {
     val points = user.score
     val description = user.description
 
-    Column(modifier = Modifier.padding(all = 8.dp)) {
+    Column(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             //modifier = Modifier.fillMaxWidth()
@@ -151,7 +152,7 @@ fun UserTile(user: User, loggedInUser: User) {
         ) {
             FilledButton(onClick = {
                 if (buttonMsg == "Edit") {
-                    // navigate to edit description
+                    navController.navigate("edit_description")
                 } else if (buttonMsg == "Friend") {
                     sendFriendRequest()
                 } else {
