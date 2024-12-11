@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.myapplication.ui.theme.BratGreen
@@ -32,6 +34,7 @@ fun FriendsScreen(navController: NavController) {
     val db = FirebaseFirestore.getInstance()
     val loggedInUser = remember { mutableStateOf(User()) }
     val auth = FirebaseAuth.getInstance()
+
     LaunchedEffect(Unit) {
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -51,6 +54,7 @@ fun FriendsScreen(navController: NavController) {
             Log.d("Auth", "No authenticated user found")
         }
     }
+
     val user = User().apply {
         description = "teehee"
         joinDate = "01/01/2003"
@@ -62,10 +66,17 @@ fun FriendsScreen(navController: NavController) {
     }
 
     var searchQuery by remember { mutableStateOf("") }
+
+    // Filter the list of friends based on the search query
+    val filteredFriends = loggedInUser.value.friends.filter {
+        it.contains(searchQuery, ignoreCase = true)
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        // Title and Search Bar
         item {
             TitleText("Friends", 32.dp)
             SearchBar(
@@ -73,29 +84,27 @@ fun FriendsScreen(navController: NavController) {
                 onQueryChange = { searchQuery = it },
                 placeholderText = "Search for your friends",
             )
+        }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                UserTile(
-                    user = user, loggedInUser = loggedInUser.value, navController = navController
-                )
-
-//            Button(
-//                onClick = { /* Handle unfriend action */ },
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = MaterialTheme.colorScheme.secondary, // Background color
-//                    contentColor = MaterialTheme.colorScheme.tertiary // Text color
-//                )
-//            ) {
-//                Text("Unfriend")
-//            }
+        // List of filtered friends
+        if (filteredFriends.isNotEmpty()) {
+            items(filteredFriends) { friendUsername ->
+                val friendUser = User(username = friendUsername)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp),
+                    horizontalArrangement = Arrangement.Start,  // Align to the left
+                    verticalAlignment = Alignment.Top
+                ) {
+                    UserTile(user = friendUser, loggedInUser = loggedInUser.value, navController = navController)
+                }
             }
-
+        } else {
+            // Display message when no friends match the search query
+            item {
+                Text("No friends found matching your search.", modifier = Modifier.padding(16.dp), color = Color.Gray)
+            }
         }
     }
 }

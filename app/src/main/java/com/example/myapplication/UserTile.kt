@@ -28,8 +28,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.ui.theme.Grey
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 
 @Composable
 fun UserTile(user: User, loggedInUser: User, navController: NavController) {
@@ -42,6 +45,9 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController) {
     var buttonMsg = "Friend"
     if (loggedInUser.username == user.username) {
         buttonMsg = "Edit"
+    }
+    if (loggedInUser.friends.contains(user.username)) {
+        buttonMsg = "Unfriend"
     }
     // need to add friend list to user class
     val imageURL = user.profilePicture
@@ -56,7 +62,6 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController) {
     Column(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            //modifier = Modifier.fillMaxWidth()
         ) {
             Image(
                 painter = painter,
@@ -154,19 +159,110 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController) {
                 if (buttonMsg == "Edit") {
                     navController.navigate("edit_description")
                 } else if (buttonMsg == "Friend") {
-                    sendFriendRequest()
+                    loggedInUser.sendFriendRequest(user,
+                        onSuccess = {
+                            buttonMsg = "Unfriend" // Update button to "Unfriend"
+                        },
+                        onFailure = { e ->
+                            Log.e("Friend Request", "Error sending request", e)
+                        })
                 } else {
-                    unFriend()
+                    loggedInUser.unFriend(user,
+                        onSuccess = {
+                            buttonMsg = "Friend" // Update button to "Unfriend"
+                        },
+                        onFailure = { e ->
+                            Log.e("Friend Request", "Error unfriending", e)
+                        })
                 }
-            }, msg = buttonMsg, modifierWrapper = Modifier.width(100.dp))
+            }, msg = buttonMsg, modifierWrapper = Modifier.width(120.dp))
         }
     }
 }
 
-fun sendFriendRequest() {
+fun User.sendFriendRequest(recipient: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    val firestore = FirebaseFirestore.getInstance()
 
+    firestore.collection("Users")
+        .whereEqualTo("username", recipient.username)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                val document = documents.documents[0]
+                val targetUserRef = document.reference
+
+                firestore.runTransaction { transaction ->
+                    val snapshot = transaction.get(targetUserRef)
+                    val friendRequests = snapshot.get("friendRequests") as? List<String> ?: emptyList()
+
+                    if (!friendRequests.contains(this.username)) {
+                        // Add the current user to the recipient's friend requests list
+                        val updatedFriendRequests = friendRequests.toMutableList()
+                        updatedFriendRequests.add(this.username)
+
+                        transaction.update(targetUserRef, "friendRequests", updatedFriendRequests)
+                    } else {
+                        throw Exception("Friend request already sent")
+                    }
+                }.addOnSuccessListener {
+                    onSuccess() // Callback to update the button message
+                }.addOnFailureListener { e ->
+                    onFailure(e) // Handle failure
+                }
+            } else {
+                // Recipient user not found
+                onFailure(Exception("Recipient user not found"))
+            }
+        }
+        .addOnFailureListener { e ->
+            onFailure(e) // Handle failure
+        }
 }
 
-fun unFriend() {
+fun User.unFriend(userToUnfriend: User, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
+    val firestore = FirebaseFirestore.getInstance()
 
+    // Get the document reference of the user to unfriend
+    firestore.collection("Users")
+        .whereEqualTo("username", userToUnfriend.username)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (documents.isEmpty) {
+                onFailure(Exception("Recipient user not found"))
+                return@addOnSuccessListener
+            }
+
+            val document = documents.documents[0]
+            val targetUserRef = document.reference
+            val loggedInUserRef = firestore.collection("Users").document(this.username)
+
+            firestore.runTransaction { transaction ->
+                val snapshotLoggedInUser = transaction.get(loggedInUserRef)
+                val snapshotUserToUnfriend = transaction.get(targetUserRef)
+
+                // Get friends lists or create an empty list if it doesn't exist
+                val loggedInUserFriends = snapshotLoggedInUser.get("friends") as? MutableList<String> ?: mutableListOf()
+                val userToUnfriendFriends = snapshotUserToUnfriend.get("friends") as? MutableList<String> ?: mutableListOf()
+
+                // Check if both users are friends
+                if (loggedInUserFriends.contains(userToUnfriend.username) && userToUnfriendFriends.contains(this.username)) {
+                    // Remove each other from friends lists
+                    loggedInUserFriends.remove(userToUnfriend.username)
+                    userToUnfriendFriends.remove(this.username)
+
+                    // Update the friends lists in Firestore
+                    transaction.update(loggedInUserRef, "friends", loggedInUserFriends)
+                    transaction.update(targetUserRef, "friends", userToUnfriendFriends)
+                } else {
+                    throw Exception("Not friends with this user")
+                }
+            }.addOnSuccessListener {
+                onSuccess() // Callback to indicate success
+            }.addOnFailureListener { e ->
+                onFailure(e) // Handle failure
+            }
+        }
+        .addOnFailureListener { e ->
+            onFailure(e) // Handle failure when fetching the user
+        }
 }
