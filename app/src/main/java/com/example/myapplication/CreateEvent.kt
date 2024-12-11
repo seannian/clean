@@ -96,23 +96,9 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    val storage = FirebaseStorage.getInstance()
-    val storageRef = storage.reference
-
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            // Set local eventPicUri to the chosen file URI (for display purposes)
-            eventPicUri = it.toString()
-            val imageRef = storageRef.child("thumbnails/${UUID.randomUUID()}")
-            val uploadTask = imageRef.putFile(it)
-            uploadTask.addOnSuccessListener {
-                imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                    // Store the download URL as the eventPicUri
-                    eventPicUri = downloadUri.toString()
-                }
-            }.addOnFailureListener { e ->
-                Log.e("ImageUpload", "Failed to upload image", e)
-            }
+            eventPicUri = uploadImage(it)
         }
     }
 
