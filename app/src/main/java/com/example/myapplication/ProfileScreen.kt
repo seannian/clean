@@ -28,12 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navController: NavController) {
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val user = remember { mutableStateOf(User()) }
@@ -60,32 +61,15 @@ fun ProfileScreen() {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(32.dp)
     ) {
         item {
-            TitleText("My Profile", 16.dp)
+            TitleText("My Profile", 0.dp)
 
-            UserTile(user = user.value, loggedInUser = user.value)
+            UserTile(user = user.value, loggedInUser = user.value, navController = navController)
 
-            // I think we can put the button in UserTile
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(8.dp),
-//            horizontalArrangement = Arrangement.End // Align content to the right
-//        ) {
-//            Button(
-//                onClick = {}, // to be added
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = MaterialTheme.colorScheme.secondary,
-//                    contentColor = MaterialTheme.colorScheme.tertiary
-//                )
-//            ) {
-//                Text("Edit")
-//            }
-//        }
 
-            TitleText("Friend Requests", 16.dp)
+            TitleText("Friend Requests", 0.dp)
             friendRequest(user.value)
         }
     }
@@ -102,7 +86,7 @@ fun friendRequest(user: User) {
     val userName = user.username
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.height(80.dp)
+        modifier = Modifier.height(120.dp)
     ) {
         Image(
             painter = painter,
@@ -113,13 +97,13 @@ fun friendRequest(user: User) {
                 .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
         )
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         Text(
-            "$userName wants to send you a Friend Request!",
+            "$userName sent you a friend request!",
             minLines = 2,
             maxLines = 2,
-            modifier = Modifier.width(160.dp)
+            modifier = Modifier.width(140.dp)
         )
 
 
@@ -127,27 +111,22 @@ fun friendRequest(user: User) {
 
         Column(
             modifier = Modifier
-                .padding(8.dp) // Padding around the buttons
+                .padding(8.dp)
                 .align(Alignment.CenterVertically)
-                .width(80.dp)
+                .width(100.dp)
         )
         {
             FilledButton(
                 {},
                 msg = "Accept",
-                modifierWrapper = Modifier.height(32.dp)
+                modifierWrapper = Modifier.height(40.dp)
             )
+            Spacer(modifier = Modifier.padding(bottom = 5.dp))
             UnfilledButton(
                 {},
                 msg = "Decline",
-                modifierWrapper = Modifier.height(32.dp)
+                modifierWrapper = Modifier.height(40.dp)
             )
         }
     }
-}
-
-@Composable
-@Preview
-fun ProfileScreenView() {
-    ProfileScreen()
 }

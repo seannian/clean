@@ -19,11 +19,16 @@ import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import androidx.compose.ui.Alignment
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AttendeeScreen(authorName: String, attendeesUsernames: List<String>) {
+fun AttendeeScreen(
+    authorName: String,
+    attendeesUsernames: List<String>,
+    navController: NavController
+) {
     val db = FirebaseFirestore.getInstance()
     val author = remember { mutableStateOf(User()) }
     val auth = FirebaseAuth.getInstance()
@@ -96,7 +101,11 @@ fun AttendeeScreen(authorName: String, attendeesUsernames: List<String>) {
                             top = 8.dp,
                         )
                     ) {
-                        UserTile(user = author.value, loggedInUser = loggedInUser.value)
+                        UserTile(
+                            user = author.value,
+                            loggedInUser = loggedInUser.value,
+                            navController = navController
+                        )
                     }
 
                     TitleText("Attendees", 32.dp)
@@ -110,7 +119,11 @@ fun AttendeeScreen(authorName: String, attendeesUsernames: List<String>) {
                     ) {
                         if (allAttendees.isNotEmpty()) {
                             allAttendees.forEach { attendee: User ->
-                                UserTile(user = attendee, loggedInUser = loggedInUser.value)
+                                UserTile(
+                                    user = attendee,
+                                    loggedInUser = loggedInUser.value,
+                                    navController = navController
+                                )
                             }
                         } else {
                             SubText("No volunteers have signed up yet.", Color.Gray)
