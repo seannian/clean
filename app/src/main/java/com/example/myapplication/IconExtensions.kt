@@ -3,6 +3,7 @@ package com.example.myapplication
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -75,6 +76,53 @@ fun RefreshIcon(onClick: () -> Unit) {
                 .size(25.dp),
             painter = svgPainter,
             contentDescription = "Refresh Icon",
+            tint = Grey,
+        )
+    }
+}
+
+@Composable
+fun VisibilityIcon(onClick: () -> Unit) {
+    val svgPainter = painterResource(id = R.drawable.visibility_icon)
+
+    Button(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(end = 3.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Grey
+        ),
+        elevation = null,
+        onClick = { onClick() }) {
+        Icon(
+            modifier = Modifier
+                .size(20.dp),
+            painter = svgPainter,
+            contentDescription = "Visibility Icon",
+            tint = Grey,
+        )
+    }
+}
+
+@Composable
+fun VisibilityCancelIcon(onClick: () -> Unit) {
+    val svgPainter = painterResource(id = R.drawable.visibility_slash_icon)
+
+    Button(modifier = Modifier
+        .wrapContentSize()
+        .padding(end = 3.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Grey
+        ),
+        elevation = null,
+        onClick = { onClick() }) {
+        Icon(
+            modifier = Modifier
+                .size(20.dp),
+            painter = svgPainter,
+            contentDescription = "Visibility Slash Icon",
             tint = Grey,
         )
     }

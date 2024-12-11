@@ -244,7 +244,7 @@ fun NavigationDrawer() {
                         HomeScreen(navController = navController)
                     }
                     composable("loginScreen") {
-                        LoginScreen(navigateToMainScreen = { navController.navigate("home") })
+                        LoginScreen(navController)
                     }
                     composable("leaderboard") {
                         user?.let { LeaderboardScreen(it) }
