@@ -25,7 +25,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.test.services.events.TimeStamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.myapplication.ui.theme.BratGreen
 import com.example.myapplication.ui.theme.ForestGreen
@@ -33,7 +32,6 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import com.google.firebase.Timestamp
-import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,11 +52,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
 
     // New state variables for currentAttendees and attendeesUsernames
     var currentAttendees by remember { mutableStateOf(0) }
-    var attendeesUsernames by remember {
-        mutableStateOf(
-            listOf<String>()
-        )
-    }
+    var attendeesUsernames by remember { mutableStateOf(listOf<String>()) }
 
     var showModal by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -149,9 +143,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
         CreateEventLabel("Event Title")
         OutlinedTextField(
             value = title,
-            onValueChange = {
-                title = it
-            },
+            onValueChange = { title = it },
             placeholder = { Text("Enter your event title") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,9 +157,7 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
         CreateEventLabel("Location")
         OutlinedTextField(
             value = location,
-            onValueChange = {
-                location = it
-            },
+            onValueChange = { location = it },
             placeholder = { Text("1 Washington Sq.") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -189,18 +179,12 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                     value = date?.toFormattedString("MM-dd-yyyy") ?: "",
                     onValueChange = { input ->
                         try {
-                            // Parse the manually entered date
                             val sdf = SimpleDateFormat("MM-dd-yyyy", Locale.getDefault())
-                            sdf.timeZone = TimeZone.getTimeZone("UTC")  // Set the time zone to UTC
-
-// Parse the input string into a Date object
+                            sdf.timeZone = TimeZone.getTimeZone("UTC")
                             val parsedDate = sdf.parse(input)
-
-                            // Update the date state if the input is valid
                             date = parsedDate?.let { Timestamp(it) }
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            // Optionally handle invalid input (e.g., show an error or reset the value)
                         }
                     },
                     placeholder = {
@@ -371,8 +355,10 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
             }
             FilledButton(
                 {
-                    val maxAttendeesInt = maxAttendees.toInt() ?: 0
-                    val pointsInt = points ?: 0
+                    val maxAttendeesInt = maxAttendees.toIntOrNull() ?: 0
+                    // Set a baseline of 1 point for every event creation (no equation)
+                    points = 1
+
                     val timestampDate = date ?: Timestamp.now()
                     val event = user?.let {
                         Event(
@@ -385,9 +371,9 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                             location = location,
                             description = description,
                             maxAttendees = maxAttendeesInt,
-                            points = pointsInt,
-                            currentAttendees = currentAttendees,  // Set to initial value
-                            attendeesUsernames = attendeesUsernames // Set to initial value
+                            points = points,
+                            currentAttendees = currentAttendees,
+                            attendeesUsernames = attendeesUsernames
                         )
                     }
 
@@ -455,7 +441,6 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
