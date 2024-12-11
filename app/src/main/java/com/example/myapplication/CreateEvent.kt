@@ -25,7 +25,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.test.services.events.TimeStamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.myapplication.ui.theme.BratGreen
 import com.example.myapplication.ui.theme.ForestGreen
@@ -34,6 +33,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.google.firebase.Timestamp
 import java.time.Instant
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.net.Uri
+import com.google.firebase.storage.FirebaseStorage
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,6 +95,20 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            // Call the uploadImage function and handle the result in the callback
+            uploadImage(it) { downloadUrl ->
+                if (downloadUrl != null) {
+                    eventPicUri = downloadUrl
+                    Log.d("ImageUpload", "Event Picture URI: $eventPicUri")
+                } else {
+                    Log.e("ImageUpload", "Failed to upload image.")
+                }
+            }
+        }
+    }
 
     fun clearFields() {
         title = ""
@@ -189,18 +207,12 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                     value = date?.toFormattedString("MM-dd-yyyy") ?: "",
                     onValueChange = { input ->
                         try {
-                            // Parse the manually entered date
                             val sdf = SimpleDateFormat("MM-dd-yyyy", Locale.getDefault())
-                            sdf.timeZone = TimeZone.getTimeZone("UTC")  // Set the time zone to UTC
-
-// Parse the input string into a Date object
+                            sdf.timeZone = TimeZone.getTimeZone("UTC")
                             val parsedDate = sdf.parse(input)
-
-                            // Update the date state if the input is valid
                             date = parsedDate?.let { Timestamp(it) }
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            // Optionally handle invalid input (e.g., show an error or reset the value)
                         }
                     },
                     placeholder = {
@@ -323,7 +335,13 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                 .padding(bottom = 10.dp)
         )
         CreateEventLabel("Upload a Thumbnail")
-        UnfilledButton({}, "Upload Thumbnail", Modifier.width(200.dp))
+        UnfilledButton(
+            onClick = {
+                launcher.launch("image/*")
+            },
+            msg = "Upload Thumbnail",
+            modifierWrapper = Modifier.width(200.dp)
+        )
 
         Spacer(modifier = Modifier.padding(bottom = 10.dp))
 
@@ -371,8 +389,8 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
             }
             FilledButton(
                 {
-                    val maxAttendeesInt = maxAttendees.toInt() ?: 0
-                    val pointsInt = points ?: 0
+                    val maxAttendeesInt = maxAttendees.toIntOrNull() ?: 0
+                    val pointsInt = points
                     val timestampDate = date ?: Timestamp.now()
                     val event = user?.let {
                         Event(
@@ -386,8 +404,8 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                             description = description,
                             maxAttendees = maxAttendeesInt,
                             points = pointsInt,
-                            currentAttendees = currentAttendees,  // Set to initial value
-                            attendeesUsernames = attendeesUsernames // Set to initial value
+                            currentAttendees = currentAttendees,
+                            attendeesUsernames = attendeesUsernames
                         )
                     }
 
