@@ -1,8 +1,12 @@
 package com.example.myapplication
 
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +22,8 @@ import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,14 +50,31 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController) {
         buttonMsg = "Edit"
     }
     // need to add friend list to user class
-    val imageURL = user.profilePicture
-    val painter = rememberImagePainter(imageURL)
+    var imageURL = remember { mutableStateOf(user.profilePicture) }
+    val painter = rememberImagePainter(imageURL.value)
 
     val userName = user.username
     val dateMade = user.joinDate
     val cleanups = user.totalNumberOfCleanups
     val points = user.score
     val description = user.description
+
+
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            // Call the uploadImage function and handle the result in the callback
+            uploadImage(it) { downloadUrl ->
+                if (downloadUrl != null) {
+                    updateProfilePicture(user = user, imageUrl = downloadUrl)
+                    imageURL.value = downloadUrl
+                    Log.d("ImageUpload", "Event Picture URI: $imageURL")
+                } else {
+                    Log.e("ImageUpload", "Failed to upload image.")
+                }
+            }
+        }
+    }
 
     Column(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
         Row(
@@ -65,6 +88,11 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController) {
                     .size(40.dp)
                     .clip(CircleShape)
                     .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    .clickable {
+                        if (loggedInUser.username == user.username) {
+                            launcher.launch("image/*")
+                        }
+                    }
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -161,6 +189,29 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController) {
             }, msg = buttonMsg, modifierWrapper = Modifier.width(100.dp))
         }
     }
+}
+
+fun updateProfilePicture(user: User, imageUrl: String) {
+    val db = FirebaseFirestore.getInstance()
+    db.collection("Users").whereEqualTo("username", user.username)
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+            if (!querySnapshot.isEmpty) {
+                val userId = querySnapshot.documents[0].id
+                db.collection("Users").document(userId)
+                    .update("profilePicture", imageUrl)
+                    .addOnSuccessListener {
+                        Log.d("edit_profilePicture", "Profile picture updated successfully!")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("edit_profilePicture", "Failed to update profile picture", e)
+                    }
+            } else {
+                Log.e("edit_profilePicture", "User not found in the database")
+            }
+        }.addOnFailureListener { e ->
+            Log.e("edit_profilePicture", "Failed to query user", e)
+        }
 }
 
 fun sendFriendRequest() {
