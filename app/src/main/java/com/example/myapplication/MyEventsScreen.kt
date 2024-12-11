@@ -31,7 +31,7 @@ import com.google.firebase.firestore.Query
 
 @Composable
 fun MyEventsScreen(
-    user: User,
+    user: User?,
     isMyEvents: Boolean,
     navController: NavController
 ) { // doubles as Past Events screen
@@ -39,6 +39,15 @@ fun MyEventsScreen(
     val filteredEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
     val isLoading = remember { mutableStateOf(true) }
     var searchQuery by remember { mutableStateOf("") }
+
+    if (user == null) {
+        LaunchedEffect(Unit) {
+            navController.navigate("loginScreen") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+        return
+    }
 
     LaunchedEffect(Unit) {
         try {

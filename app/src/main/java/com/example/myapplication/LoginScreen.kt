@@ -24,9 +24,10 @@ import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
 import android.content.Context
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 
 @Composable
-fun LoginScreen(navigateToMainScreen: () -> Unit) {
+fun LoginScreen(navController: NavController) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
 
@@ -52,34 +53,32 @@ fun LoginScreen(navigateToMainScreen: () -> Unit) {
 
         Spacer(modifier = Modifier.padding(16.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            maxLines = 1,
-            placeholder = { Text("Enter Your Password") }
+        PasswordOutlinedTextField(
+            password = password,
+            onPasswordChange = { password = it },
+            isConfirm = false
         )
 
         Spacer(modifier = Modifier.padding(24.dp))
 
         Button(
             onClick = {
-                loginUser(auth, email, password, context, navigateToMainScreen)
+                loginUser(auth, email, password, context, navController)
             }
         ) {
-            Text("Login")
+            Text("Login", fontSize = 16.sp)
         }
 
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.padding(8.dp))
 
         Text("Or")
 
-        Spacer(modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.padding(8.dp))
 
         Button(onClick = {
-            // Navigate to the Sign Up Screen (Implement Sign Up Screen Navigation here)
+            navController.navigate("signupScreen")
         }) {
-            Text("Sign Up")
+            Text("Sign Up", fontSize = 16.sp)
         }
     }
 }
@@ -89,16 +88,20 @@ fun loginUser(
     email: String,
     password: String,
     context: Context,
-    navigateToMainScreen: () -> Unit
+    navController: NavController
 ) {
     if (email.isNotEmpty() && password.isNotEmpty()) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
-                    navigateToMainScreen() // Navigate to main screen
+                    navController.navigate("navigationDrawer")
                 } else {
-                    Toast.makeText(context, "Login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        "Login failed: ${task.exception?.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
     } else {

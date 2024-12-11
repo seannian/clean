@@ -22,20 +22,46 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
+    private lateinit var authStateListener: FirebaseAuth.AuthStateListener
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme(dynamicColor = false) {
                 val navController = rememberNavController()
+
+                val auth = FirebaseAuth.getInstance()
+                authStateListener = FirebaseAuth.AuthStateListener { auth ->
+                    val user = auth.currentUser
+                    if (user != null) {
+                    } else {
+                        navController.navigate("loginScreen") {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    }
+                }
+
+                auth.addAuthStateListener(authStateListener)
                 MainScreen(navController = navController)
             }
+        }
+
+        fun onStart() {
+            super.onStart()
+            FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
+        }
+
+        fun onStop() {
+            super.onStop()
+            FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
         }
     }
 }
 
+
 @Composable
 fun MainScreen(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(navController = navController, startDestination = "loginScreen") {
         composable("home") {
             HomeScreen(navController = navController)
         }
@@ -46,10 +72,10 @@ fun MainScreen(navController: NavHostController) {
             FunctionTest(navController = navController)
         }
         composable("loginScreen") {
-            LoginScreen(navigateToMainScreen = { navController.navigate("home") })
+            LoginScreen(navController)
         }
         composable("signupScreen") {
-            SignupScreen(navigateToMainScreen = { navController.navigate("home") })
+            SignupScreen(navController)
         }
         composable("friendScreen") {
             FriendsScreen()
@@ -63,7 +89,6 @@ fun MainScreen(navController: NavHostController) {
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
-    // State to hold user login status
     var loginStatus by remember { mutableStateOf("") }
 
     Box(

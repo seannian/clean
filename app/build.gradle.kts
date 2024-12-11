@@ -9,12 +9,13 @@ plugins {
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.myapplication"
         minSdk = 26
-        targetSdk = 34
+        //noinspection EditedTargetSdkVersion
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -94,11 +95,11 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("com.google.maps.android:maps-compose:2.11.1")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.accompanist:accompanist-permissions:0.33.0-alpha")
     implementation("io.coil-kt:coil-compose:2.1.0")
     implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.google.maps.android:maps-compose:6.4.0")
 }
 
 secrets {
