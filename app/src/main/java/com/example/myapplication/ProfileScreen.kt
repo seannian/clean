@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,7 +70,7 @@ fun ProfileScreen(navController: NavController) {
         item {
             TitleText("My Profile", 0.dp)
         }
-        
+
         // Profile User Tile
         item {
             UserTile(user = user.value, loggedInUser = user.value, navController = navController, event = Event())
@@ -80,16 +81,15 @@ fun ProfileScreen(navController: NavController) {
             TitleText("Friend Requests", 0.dp)
         }
 
-        // Display friend requests
-        items(user.value.friendRequests ?: emptyList()) { friendRequestUsername ->
-            friendRequest(friendRequestUsername, user.value)
+        // Pass user (MutableState<User>) instead of user.value
+        items(user.value.friendRequests) { friendRequestUsername ->
+            friendRequest(friendRequestUsername, user)
         }
     }
 }
 
-
 @Composable
-fun friendRequest(friendRequestUsername: String, user: User) {
+fun friendRequest(friendRequestUsername: String, user: MutableState<User>) {
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
 
@@ -97,7 +97,6 @@ fun friendRequest(friendRequestUsername: String, user: User) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.height(120.dp)
     ) {
-        // Placeholder for image or user profile picture
         Image(
             painter = rememberImagePainter("https://via.placeholder.com/150"),
             contentDescription = "Contact profile picture",
@@ -141,56 +140,65 @@ fun friendRequest(friendRequestUsername: String, user: User) {
     }
 }
 
-
-// Helper Function to Accept Friend Request
+// Accept Friend Request
 private fun acceptFriendRequest(
     friendRequestUsername: String,
-    user: User,
+    user: MutableState<User>,
     db: FirebaseFirestore,
     auth: FirebaseAuth
 ) {
     val currentUserId = auth.currentUser?.uid ?: return
     val userRef = db.collection("Users").document(currentUserId)
 
-    // Query to find the friend's document based on the username
     val friendRefQuery = db.collection("Users").whereEqualTo("username", friendRequestUsername).get()
-
     friendRefQuery.addOnSuccessListener { querySnapshot ->
         if (!querySnapshot.isEmpty) {
-            val friendDoc = querySnapshot.documents[0] // Assuming the first result is the correct friend
+            val friendDoc = querySnapshot.documents[0]
             val friendRef = friendDoc.reference
 
-            // Start Firestore transaction
             db.runTransaction { transaction ->
-                // Get current user and friend's data
                 val userSnapshot = transaction.get(userRef)
                 val friendSnapshot = transaction.get(friendRef)
 
-                // Get current friend requests and friends list (if they exist)
                 val currentFriendRequests = userSnapshot.get("friendRequests") as? List<String> ?: emptyList()
                 val currentUserFriends = userSnapshot.get("friends") as? List<String> ?: emptyList()
                 val currentFriendFriends = friendSnapshot.get("friends") as? List<String> ?: emptyList()
 
-                // Remove the friend request
                 val updatedFriendRequests = currentFriendRequests.toMutableList().apply {
                     remove(friendRequestUsername)
                 }
-
-                // Add the user to each other's friends list
                 val updatedUserFriends = currentUserFriends.toMutableList().apply {
                     add(friendRequestUsername)
                 }
-
                 val updatedFriendFriends = currentFriendFriends.toMutableList().apply {
-                    add(user.username)
+                    add(user.value.username)
                 }
 
-                // Update the Firestore documents in the transaction
                 transaction.update(userRef, "friendRequests", updatedFriendRequests)
                 transaction.update(userRef, "friends", updatedUserFriends)
                 transaction.update(friendRef, "friends", updatedFriendFriends)
             }.addOnSuccessListener {
                 Log.d("Firestore", "Friend request accepted successfully")
+
+                // Update UI immediately
+                val updatedRequests = user.value.friendRequests.toMutableList()
+                updatedRequests.remove(friendRequestUsername)
+
+                val updatedFriends = user.value.friends.toMutableList()
+                updatedFriends.add(friendRequestUsername)
+
+                // Assign a new User instance to trigger recomposition
+                user.value = User(
+                    description = user.value.description,
+                    joinDate = user.value.joinDate,
+                    profilePicture = user.value.profilePicture,
+                    totalNumberOfCleanups = user.value.totalNumberOfCleanups,
+                    email = user.value.email,
+                    score = user.value.score,
+                    username = user.value.username,
+                    friends = updatedFriends,
+                    friendRequests = updatedRequests
+                )
             }.addOnFailureListener { e ->
                 Log.e("Firestore", "Error accepting friend request", e)
             }
@@ -202,10 +210,10 @@ private fun acceptFriendRequest(
     }
 }
 
-// Helper Function to Decline Friend Request
+// Decline Friend Request
 private fun declineFriendRequest(
     friendRequestUsername: String,
-    user: User,
+    user: MutableState<User>,
     db: FirebaseFirestore,
     auth: FirebaseAuth
 ) {
@@ -220,6 +228,22 @@ private fun declineFriendRequest(
         transaction.update(userRef, "friendRequests", updatedFriendRequests)
     }.addOnSuccessListener {
         Log.d("Firestore", "Friend request declined successfully")
+
+        // Update UI immediately
+        val updatedRequests = user.value.friendRequests.toMutableList()
+        updatedRequests.remove(friendRequestUsername)
+
+        user.value = User(
+            description = user.value.description,
+            joinDate = user.value.joinDate,
+            profilePicture = user.value.profilePicture,
+            totalNumberOfCleanups = user.value.totalNumberOfCleanups,
+            email = user.value.email,
+            score = user.value.score,
+            username = user.value.username,
+            friends = user.value.friends,
+            friendRequests = updatedRequests
+        )
     }.addOnFailureListener {
         Log.e("Firestore", "Error declining friend request", it)
     }
