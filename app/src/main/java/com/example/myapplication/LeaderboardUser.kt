@@ -34,7 +34,6 @@ fun LeaderboardUser(medal: Int, user: User) {
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             if (medal <= 2) {
-                //calc tint
                 if (medal == 0) {
                     MedalIcon(Gold)
                 } else if (medal == 1) {

@@ -44,13 +44,9 @@ import java.util.concurrent.TimeUnit
 
 @Composable
 fun UserTile(user: User, loggedInUser: User, navController: NavController, event: Event) {
-    // Initialize Firestore instance
     val db = FirebaseFirestore.getInstance()
-
-    // State to hold the image URL, starting with the user's existing profilePicture field
     val imageURL = remember { mutableStateOf(user.profilePicture) }
 
-    // Fetch the updated profile picture from Firestore when this composable is displayed
     LaunchedEffect(key1 = user.username) {
         db.collection("Users")
             .whereEqualTo("username", user.username)
@@ -69,10 +65,7 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
             }
     }
 
-    // Update painter to use rememberAsyncImagePainter
     val painter = rememberAsyncImagePainter(model = imageURL.value)
-
-    // Determine the button message (Friend/Edit/Unfriend)
     var buttonMsg = "Friend"
     if (loggedInUser.username == user.username) {
         buttonMsg = "Edit"
@@ -88,10 +81,8 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
     val points = user.score
     val description = user.description
 
-    // Launcher for selecting an image from the device
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            // Upload the image and update profile picture
             uploadImage(it) { downloadUrl ->
                 if (downloadUrl != null) {
                     updateProfilePicture(user = user, imageUrl = downloadUrl)
@@ -129,7 +120,6 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Join date
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,7 +138,6 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Cleanups completed
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -167,7 +156,6 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Points earned
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -206,7 +194,6 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
                 .padding(top = 16.dp, bottom = 16.dp),
             horizontalArrangement = if (event.author != "" && loggedInUser.username == event.author && user.username != event.author) Arrangement.SpaceEvenly else Arrangement.End
         ) {
-            // If the logged-in user is the author of the event and viewing another user's tile, show attended toggle button
             if (event.author != "" && loggedInUser.username == event.author && user.username != event.author) {
                 UnfilledButton(onClick = {
                     val pointsAdded = event.points.toLong()
@@ -256,8 +243,6 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
                     "Friend" -> {
                         loggedInUser.sendFriendRequest(user,
                             onSuccess = {
-                                // After sending friend request, ideally you might refetch the user or update state
-                                // For simplicity, just log and trust UI reflects changes after reload
                                 Log.d("Friend Request", "Friend request sent successfully")
                             },
                             onFailure = { e ->
@@ -268,7 +253,6 @@ fun UserTile(user: User, loggedInUser: User, navController: NavController, event
                     "Unfriend" -> {
                         loggedInUser.unFriend(user,
                             onSuccess = {
-                                // After unfriending, log success
                                 Log.d("Friend Request", "User unfriended successfully")
                             },
                             onFailure = { e ->

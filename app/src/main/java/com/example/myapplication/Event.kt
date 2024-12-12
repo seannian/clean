@@ -6,14 +6,13 @@ data class Event(
     val title: String = "",
     val author: String = "",
     val eventPicUri: String = "",
-    val date: Timestamp? = null,  // Use Firestore Timestamp
-    val startTime: Timestamp? = null,  // Changed to Firestore Timestamp
-    val endTime: Timestamp? = null,    // Changed to Firestore Timestamp
+    val date: Timestamp? = null,
+    val startTime: Timestamp? = null,
+    val endTime: Timestamp? = null,
     val location: String = "",
     val description: String = "",
     val maxAttendees: Int = 0,
     val points: Int = 0,
-    val currentAttendees: Int = 0,  // New count for current attendees
-    val attendeesUsernames: List<String> = listOf(),  // New list for usernames of attendees
-    // val draft: Boolean = false, need to add this to the database
+    val currentAttendees: Int = 0,
+    val attendeesUsernames: List<String> = listOf(),
 )

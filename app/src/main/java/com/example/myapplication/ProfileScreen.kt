@@ -66,22 +66,15 @@ fun ProfileScreen(navController: NavController) {
             .fillMaxSize()
             .padding(32.dp)
     ) {
-        // Add a header as a separate item
         item {
             TitleText("My Profile", 0.dp)
         }
-
-        // Profile User Tile
         item {
             UserTile(user = user.value, loggedInUser = user.value, navController = navController, event = Event())
         }
-
-        // Add Friend Requests as another item
         item {
             TitleText("Friend Requests", 0.dp)
         }
-
-        // Pass user (MutableState<User>) instead of user.value
         items(user.value.friendRequests) { friendRequestUsername ->
             friendRequest(friendRequestUsername, user)
         }
@@ -123,14 +116,12 @@ fun friendRequest(friendRequestUsername: String, user: MutableState<User>) {
                 .align(Alignment.CenterVertically)
                 .width(100.dp)
         ) {
-            // Accept Button
             FilledButton(
                 onClick = { acceptFriendRequest(friendRequestUsername, user, db, auth) },
                 msg = "Accept",
                 modifierWrapper = Modifier.height(40.dp)
             )
             Spacer(modifier = Modifier.padding(bottom = 5.dp))
-            // Decline Button
             UnfilledButton(
                 onClick = { declineFriendRequest(friendRequestUsername, user, db, auth) },
                 msg = "Decline",
@@ -140,7 +131,6 @@ fun friendRequest(friendRequestUsername: String, user: MutableState<User>) {
     }
 }
 
-// Accept Friend Request
 private fun acceptFriendRequest(
     friendRequestUsername: String,
     user: MutableState<User>,
@@ -180,14 +170,12 @@ private fun acceptFriendRequest(
             }.addOnSuccessListener {
                 Log.d("Firestore", "Friend request accepted successfully")
 
-                // Update UI immediately
                 val updatedRequests = user.value.friendRequests.toMutableList()
                 updatedRequests.remove(friendRequestUsername)
 
                 val updatedFriends = user.value.friends.toMutableList()
                 updatedFriends.add(friendRequestUsername)
 
-                // Assign a new User instance to trigger recomposition
                 user.value = User(
                     description = user.value.description,
                     joinDate = user.value.joinDate,
@@ -210,7 +198,6 @@ private fun acceptFriendRequest(
     }
 }
 
-// Decline Friend Request
 private fun declineFriendRequest(
     friendRequestUsername: String,
     user: MutableState<User>,
@@ -229,7 +216,6 @@ private fun declineFriendRequest(
     }.addOnSuccessListener {
         Log.d("Firestore", "Friend request declined successfully")
 
-        // Update UI immediately
         val updatedRequests = user.value.friendRequests.toMutableList()
         updatedRequests.remove(friendRequestUsername)
 

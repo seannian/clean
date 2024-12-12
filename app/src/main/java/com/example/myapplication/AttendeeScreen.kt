@@ -93,8 +93,6 @@ fun AttendeeScreen(
             event.value = document.toObject(Event::class.java)!!
             Log.d("finished fetching", event.value.title)
         }
-
-        // Update loading state after fetching data
         isLoading.value = false
     }
 

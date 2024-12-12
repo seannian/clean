@@ -58,11 +58,9 @@ fun LeaderboardScreen(user: User) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Use the calculated globalProgress to dynamically show the percentage
             TitleText("Global Impact Bar (${(globalProgress * 100).toInt()}%)", 16.dp)
             Spacer(modifier = Modifier.padding(bottom = 10.dp))
-//        globalProgress = 1.0f
-            LinearProgressBar(globalProgress)  // Pass the dynamic value here
+            LinearProgressBar(globalProgress)
             HorizontalDivider(
                 color = ForestGreen,
                 thickness = 5.dp,

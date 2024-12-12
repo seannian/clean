@@ -255,7 +255,7 @@ fun NavigationDrawer() {
             content = { paddingValues ->
                 NavHost(
                     navController = navController,
-                    startDestination = "events", // Set initial screen
+                    startDestination = "events",
                     modifier = Modifier.padding(paddingValues)
                 ) {
                     composable("home") {

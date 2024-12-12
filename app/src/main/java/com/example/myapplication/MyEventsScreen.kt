@@ -34,7 +34,7 @@ fun MyEventsScreen(
     user: User?,
     isMyEvents: Boolean,
     navController: NavController
-) { // doubles as Past Events screen
+) {
     val allEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
     val filteredEvents = remember { mutableStateOf<List<Event>>(emptyList()) }
     val isLoading = remember { mutableStateOf(true) }
@@ -66,7 +66,7 @@ fun MyEventsScreen(
                         event.toObject(Event::class.java)
                     }
                     allEvents.value = fetchedEvents
-                    filteredEvents.value = fetchedEvents // Initialize with all events
+                    filteredEvents.value = fetchedEvents
                     isLoading.value = false
                 }
                 .addOnFailureListener { exception ->
@@ -79,7 +79,6 @@ fun MyEventsScreen(
         }
     }
 
-    // Update filtered events when the search query changes
     LaunchedEffect(searchQuery) {
         filteredEvents.value = if (searchQuery.isEmpty()) {
             allEvents.value
