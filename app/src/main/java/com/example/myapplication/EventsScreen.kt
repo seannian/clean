@@ -184,8 +184,8 @@ fun CustomMapMarker(
 ) {
     val location = getCoordinates(
         event.location,
-        "AIzaSyCNDf5d3MdZBKkFrYuHt8dKetYDYWcTk0A"
-    )
+        ""
+    ) // insert api key into empty string
     Log.d("coordinates", event.title + ": " + location)
     val markerState = remember { MarkerState(position = location) }
     val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 0.dp)
