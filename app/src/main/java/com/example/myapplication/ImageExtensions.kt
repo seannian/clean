@@ -13,7 +13,7 @@ fun rememberImagePainter(
 ): Painter {
     return rememberAsyncImagePainter(
         model = imageURL,
-        error = painterResource(errorRes), // Fallback image on error
-        placeholder = painterResource(placeholderRes) // Placeholder during loading
+        error = painterResource(errorRes),
+        placeholder = painterResource(placeholderRes)
     )
 }

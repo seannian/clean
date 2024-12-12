@@ -16,19 +16,17 @@ fun uploadImage(uri: Uri, callback: (String?) -> Unit) {
 
     val uploadTask = imageRef.putFile(uri)
 
-    // Handle upload success and failure
     uploadTask.addOnSuccessListener {
-        // Retrieve the download URL
         imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
             val firebaseUri = downloadUri.toString()
             Log.d("ImageURI", "Download URL: $firebaseUri")
-            callback(firebaseUri) // Return the URL via callback
+            callback(firebaseUri)
         }.addOnFailureListener { e ->
             Log.e("ImageURI", "Failed to get download URL", e)
-            callback(null) // Notify failure
+            callback(null)
         }
     }.addOnFailureListener { e ->
         Log.e("ImageUpload", "Failed to upload image", e)
-        callback(null) // Notify failure
+        callback(null)
     }
 }

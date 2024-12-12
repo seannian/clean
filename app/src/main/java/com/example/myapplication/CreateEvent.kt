@@ -42,7 +42,6 @@ import java.util.UUID
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) {
-    // State variables for user inputs
     val db = FirebaseFirestore.getInstance()
 
     var title by remember { mutableStateOf("") }
@@ -55,8 +54,6 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
     var description by remember { mutableStateOf("") }
     var maxAttendees by remember { mutableStateOf("") }
     var points by remember { mutableStateOf(0) }
-
-    // New state variables for currentAttendees and attendeesUsernames
     var currentAttendees by remember { mutableStateOf(0) }
     var attendeesUsernames by remember { mutableStateOf(listOf<String>()) }
 
@@ -94,7 +91,6 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            // Call the uploadImage function and handle the result in the callback
             uploadImage(it) { downloadUrl ->
                 if (downloadUrl != null) {
                     eventPicUri = downloadUrl
@@ -404,7 +400,6 @@ fun CreateEvent(user: User?, navController: NavController, eventTitle: String?) 
                     isLoading = true
                     if (event != null) {
                         if (eventTitle != null && eventTitle != "hi") {
-                            // Edit existing event
                             db.collection("Events")
                                 .whereEqualTo("title", eventTitle)
                                 .get()

@@ -1,4 +1,3 @@
-// DatabaseExample.kt
 package com.example.myapplication
 
 import androidx.compose.foundation.layout.*
@@ -17,7 +16,6 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavController) {
-    // State variables
     var inputText by remember { mutableStateOf("") }
     var displayText by remember { mutableStateOf("Hello $name!") }
     var isLoading by remember { mutableStateOf(false) }
@@ -28,20 +26,17 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
     var isQueryingUsers by remember { mutableStateOf(false) }
     var topUsers by remember { mutableStateOf<List<Map<String, Any>>?>(null) }
     var isAddingEvents by remember { mutableStateOf(false) }
-
-    // Firestore instance
     val db = FirebaseFirestore.getInstance()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Top, // Changed to Top to accommodate scrolling
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Greeting Text
         Text(
             text = displayText,
             style = MaterialTheme.typography.headlineMedium
@@ -49,7 +44,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Input Field
         OutlinedTextField(
             value = inputText,
             onValueChange = { inputText = it },
@@ -59,7 +53,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Submit Button
         Button(
             onClick = {
                 if (inputText.isNotBlank()) {
@@ -102,7 +95,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Feedback Message
         if (feedbackMessage.isNotEmpty()) {
             Text(
                 text = feedbackMessage,
@@ -113,7 +105,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Delete All Data Button
         Button(
             onClick = { showDeleteConfirmation = true },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
@@ -132,7 +123,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
             }
         }
 
-        // Confirmation Dialog
         if (showDeleteConfirmation) {
             AlertDialog(
                 onDismissRequest = { showDeleteConfirmation = false },
@@ -145,10 +135,8 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
                             isDeleting = true
                             feedbackMessage = "Deleting all data..."
 
-                            // Define all collections to delete
                             val collectionsToDelete = listOf("userInputs", "Users", "Events")
 
-                            // Function to delete all documents in a collection
                             fun deleteCollection(collectionName: String, onComplete: (Boolean, String) -> Unit) {
                                 db.collection(collectionName)
                                     .get()
@@ -176,12 +164,10 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
                                     }
                             }
 
-                            // Counter to track completed deletions
                             var completed = 0
                             var hasError = false
                             var errorMessage = ""
 
-                            // Iterate through each collection and delete
                             for (collection in collectionsToDelete) {
                                 deleteCollection(collection) { success, message ->
                                     if (!success && !hasError) {
@@ -200,7 +186,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
                                 }
                             }
 
-                            // Handle case where there are no collections to delete
                             if (collectionsToDelete.isEmpty()) {
                                 isDeleting = false
                                 feedbackMessage = "No collections found to delete."
@@ -222,7 +207,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Add Sample Users Button
         Button(
             onClick = {
                 isAddingUsers = true
@@ -233,8 +217,7 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
                     val username = "User$i"
                     val email = "user$i@example.com"
                     val score = (0..100).random()
-                    // Use Firebase Timestamp for JoinDate
-                    val joinDate = Timestamp.now() // Current timestamp
+                    val joinDate = Timestamp.now()
                     val totalCleanups = (0..50).random()
                     val profilePicture = "https://example.com/profile$i.png"
                     val description = "Description for user $i"
@@ -243,7 +226,7 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
                         "username" to username,
                         "email" to email,
                         "score" to score,
-                        "JoinDate" to joinDate, // Firebase Timestamp
+                        "JoinDate" to joinDate,
                         "TotalNumberOfCleanups" to totalCleanups,
                         "ProfilePicture" to profilePicture,
                         "Description" to description
@@ -275,10 +258,7 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
                 Text("Add Sample Users")
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Add Dummy Events Button
         Button(
             onClick = {
                 isAddingEvents = true
@@ -337,7 +317,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Show Top Scoring Users Button
         Button(
             onClick = {
                 isQueryingUsers = true
@@ -370,7 +349,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
             }
         }
 
-        // Display Top Scoring Users
         if (topUsers != null) {
             Spacer(modifier = Modifier.height(16.dp))
             Text("Top Scoring Users:", style = MaterialTheme.typography.headlineSmall)
@@ -392,7 +370,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // New Button to Navigate to TestCreateUser
         Button(
             onClick = {
                 navController.navigate("testCreateUser")
@@ -404,7 +381,6 @@ fun DatabaseExample(name: String, onSignOut: () -> Unit, navController: NavContr
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sign Out Button
         Button(
             onClick = onSignOut,
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),

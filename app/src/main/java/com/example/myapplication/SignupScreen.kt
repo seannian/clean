@@ -27,17 +27,12 @@ import androidx.navigation.NavController
 
 @Composable
 fun SignupScreen(navController: NavController) {
-    // Initialize Firebase Auth
     val auth = FirebaseAuth.getInstance()
-
-    // State variables
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-
-    // Coroutine scope for asynchronous tasks
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -78,10 +73,7 @@ fun SignupScreen(navController: NavController) {
 
         Button(
             onClick = {
-                // Clear previous messages
                 errorMessage = null
-
-                // Input validation
                 if (email.isBlank() || password.isBlank() || confirmPassword.isBlank()) {
                     errorMessage = "All fields are required."
                     return@Button
@@ -92,21 +84,16 @@ fun SignupScreen(navController: NavController) {
                     return@Button
                 }
 
-                // Proceed with sign-up
                 isLoading = true
                 coroutineScope.launch {
                     try {
-                        // Create user with email and password
                         auth.createUserWithEmailAndPassword(email, password).await()
                         val currentUser = auth.currentUser
                         if (currentUser != null) {
                             val uid = currentUser.uid
                             val db = FirebaseFirestore.getInstance()
-
-                            // Check if user exists in Firestore
                             val userDocument = db.collection("Users").document(uid).get().await()
                             if (userDocument.exists()) {
-                                // User already exists in Firestore
                                 isLoading = false
                                 Toast.makeText(
                                     context,
@@ -114,7 +101,6 @@ fun SignupScreen(navController: NavController) {
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } else {
-                                // User does not exist in Firestore, create new user document
                                 val joinDate = SimpleDateFormat(
                                     "yyyy-MM-dd HH:mm:ss",
                                     Locale.getDefault()
@@ -124,13 +110,11 @@ fun SignupScreen(navController: NavController) {
                                     this.username =
                                         currentUser.email?.substringBefore("@") ?: "Unknown"
                                     this.joinDate = joinDate
-                                    // Initialize other fields as needed
                                     this.description = ""
                                     this.profilePicture = ""
                                     this.totalNumberOfCleanups = 0
                                     this.score = 0
                                 }
-                                // Save to Firestore
                                 db.collection("Users").document(uid).set(user).await()
                                 isLoading = false
                                 Toast.makeText(
@@ -174,7 +158,6 @@ fun SignupScreen(navController: NavController) {
             Text("Login", fontSize = 16.sp)
         }
 
-        // Display error message
         errorMessage?.let { msg ->
             Text(
                 text = msg,

@@ -1,4 +1,3 @@
-// TestCreateUser.kt
 package com.example.myapplication
 
 import androidx.compose.foundation.layout.*
@@ -15,19 +14,15 @@ import java.util.*
 
 @Composable
 fun TestCreateUser(navController: NavController) {
-    // State variables for Description and Profile Picture
     var description by remember { mutableStateOf("") }
     var profilePicture by remember { mutableStateOf("") }
     var isSubmitting by remember { mutableStateOf(false) }
     var feedbackMessage by remember { mutableStateOf("") }
 
-    // Firestore instance
     val db = FirebaseFirestore.getInstance()
 
-    // Get current user from FirebaseAuth
     val currentUser = FirebaseAuth.getInstance().currentUser
 
-    // Handle case where user is not logged in
     if (currentUser == null) {
         Text("User not authenticated.")
         return
@@ -37,12 +32,11 @@ fun TestCreateUser(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Top, // Changed to Top to accommodate scrolling
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Display Current User Info (Optional)
         Text(
             text = "Creating Profile for: ${currentUser.displayName ?: "Unknown User"}",
             style = MaterialTheme.typography.headlineMedium
@@ -50,7 +44,6 @@ fun TestCreateUser(navController: NavController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Description Input Field
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
@@ -63,7 +56,6 @@ fun TestCreateUser(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Profile Picture URL Input Field
         OutlinedTextField(
             value = profilePicture,
             onValueChange = { profilePicture = it },
@@ -74,35 +66,29 @@ fun TestCreateUser(navController: NavController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Submission Button
         Button(
             onClick = {
                 if (description.isNotBlank() && profilePicture.isNotBlank()) {
                     isSubmitting = true
 
-                    // Get current timestamp as joinDate
                     val joinDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
 
-                    // Create User object
                     val user = User().apply {
                         this.description = description
                         this.profilePicture = profilePicture
                         this.joinDate = joinDate
                         this.email = currentUser.email ?: ""
                         this.username = currentUser.displayName ?: "Unknown"
-                        // Initialize other fields as needed
                         this.totalNumberOfCleanups = 0
                         this.score = 0
                     }
 
-                    // Save to Firestore under "Users" collection with UID as document ID
                     db.collection("Users")
                         .document(currentUser.uid)
                         .set(user)
                         .addOnSuccessListener {
                             isSubmitting = false
                             feedbackMessage = "Profile created successfully."
-                            // Optionally navigate back or to another screen
                             navController.popBackStack()
                         }
                         .addOnFailureListener { e ->
@@ -128,7 +114,6 @@ fun TestCreateUser(navController: NavController) {
             }
         }
 
-        // Feedback Message
         if (feedbackMessage.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -140,7 +125,6 @@ fun TestCreateUser(navController: NavController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Back Button
         Button(
             onClick = {
                 navController.popBackStack()

@@ -81,7 +81,6 @@ fun MainScreen(navController: NavHostController) {
         composable("friendScreen") {
             FriendsScreen(navController)
         }
-        // New route for NavigationDrawer
         composable("navigationDrawer") {
             NavigationDrawer()
         }
@@ -112,7 +111,6 @@ fun HomeScreen(navController: NavHostController) {
             Button(onClick = { navController.navigate("signupScreen") }) {
                 Text(text = "Go to Signup Screen")
             }
-            // New Button to navigate to NavigationDrawer
             Button(onClick = { navController.navigate("navigationDrawer") }) {
                 Text(text = "Open Navigation Drawer")
             }

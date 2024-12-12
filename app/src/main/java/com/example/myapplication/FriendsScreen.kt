@@ -58,16 +58,15 @@ fun FriendsScreen(navController: NavController) {
     val user = User().apply {
         description = "teehee"
         joinDate = "01/01/2003"
-        profilePicture = "" // Assuming an empty string for now
+        profilePicture = ""
         totalNumberOfCleanups = 0
-        email = "" // Assuming an empty string for now
+        email = ""
         score = 0
         username = "User"
     }
 
     var searchQuery by remember { mutableStateOf("") }
 
-    // Filter the list of friends based on the search query
     val filteredFriends = loggedInUser.value.friends.filter {
         it.contains(searchQuery, ignoreCase = true)
     }
@@ -76,7 +75,6 @@ fun FriendsScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // Title and Search Bar
         item {
             TitleText("Friends", 32.dp)
             SearchBar(
@@ -85,7 +83,6 @@ fun FriendsScreen(navController: NavController) {
                 placeholderText = "Search for your friends",
             )
         }
-        // List of filtered friends
         if (filteredFriends.isNotEmpty()) {
             items(filteredFriends) { friendUsername ->
                 val friendUser = User(username = friendUsername)
@@ -93,14 +90,13 @@ fun FriendsScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 32.dp, end = 32.dp, top = 8.dp, bottom = 8.dp),
-                    horizontalArrangement = Arrangement.Start,  // Align to the left
+                    horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.Top
                 ) {
                     UserTile(user = friendUser, loggedInUser = loggedInUser.value, navController = navController, event = Event())
                 }
             }
         } else {
-            // Display message when no friends match the search query
             item {
                 Text("No friends found matching your search.", modifier = Modifier.padding(16.dp), color = Color.Gray)
             }

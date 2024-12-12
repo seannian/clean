@@ -265,9 +265,7 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
 
                                         val isJoining = !attendeesUsernames.contains(currentUser.username)
 
-                                        // Prevent joining if the event is at full capacity
                                         if (isJoining && currentAttendees >= maxAttendees) {
-                                            // Do nothing, or show a message (not shown here)
                                             return@runTransaction null
                                         }
 
@@ -284,8 +282,6 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
                                             updatedAttendeesUsernames.remove(currentUser.username)
                                         }
 
-                                        // Calculate new points based on newAttendeesCount
-                                        // Formula: ceil((newAttendeesCount / 2.0) + 0.5)
                                         val newPoints = ceil((newAttendeesCount.toDouble() / 2.0) + 0.5).toInt()
 
                                         transaction.update(eventRef, "currentAttendees", newAttendeesCount)
@@ -317,9 +313,6 @@ fun EventComponent(event: Event, parentPage: String, navController: NavControlle
     }
 }
 
-/**
- * Extension function to convert Timestamp to a formatted String
- */
 fun Timestamp.toFormattedString(format: String): String {
     val sdf = SimpleDateFormat(format, Locale.getDefault())
     return sdf.format(this.toDate())

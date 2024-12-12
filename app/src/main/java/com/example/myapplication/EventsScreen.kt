@@ -80,7 +80,7 @@ fun EventsScreen(navController: NavController) {
                         document.toObject(Event::class.java)
                     }
                     allEvents.value = fetchedEvents
-                    filteredEvents.value = fetchedEvents // Initialize with all events
+                    filteredEvents.value = fetchedEvents
                     isLoading = false
                 }
                 .addOnFailureListener { exception ->
@@ -184,8 +184,8 @@ fun CustomMapMarker(
 ) {
     val location = getCoordinates(
         event.location,
-        ""
-    ) // put your own api key here
+        "AIzaSyCNDf5d3MdZBKkFrYuHt8dKetYDYWcTk0A"
+    )
     Log.d("coordinates", event.title + ": " + location)
     val markerState = remember { MarkerState(position = location) }
     val shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 0.dp)
@@ -236,7 +236,7 @@ fun CustomMapMarker(
 }
 
 fun getCoordinates(address: String, apiKey: String): LatLng {
-    val encodedAddress = URLEncoder.encode(address, "UTF-8") // Properly encode the address
+    val encodedAddress = URLEncoder.encode(address, "UTF-8")
     Log.d("encodedAddress", encodedAddress)
     Log.d("apiKey", apiKey)
     val url =
